@@ -18,8 +18,9 @@ import {
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DialogClose } from "@radix-ui/react-dialog";
+import axios from "axios";
 
-const Home = () => {
+const  Home = () => {
   return (
     <div className=" min-h-screen w-full ">
       <div>
@@ -60,7 +61,12 @@ const Home = () => {
                   <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                   </DialogClose>
-                  <Button type="submit">Save changes</Button>
+                  <Button type="submit" 
+                  onClick={async()=>{
+                      const res = await axios.get('http://localhost:8888/api/v1/cred/get-all');
+                      console.log(res)
+                  }}
+                  >Save changes</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

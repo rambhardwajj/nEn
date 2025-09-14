@@ -11,7 +11,15 @@ function App() {
     <>
       <SidebarProvider>
         <Routes>
-          <Route element={<><AppSidebar /><Home /></>} path="/" />
+          <Route
+            element={
+              <>
+                <AppSidebar />
+                <Home />
+              </>
+            }
+            path="/"
+          />
 
           <Route element={<Login />} path="/login" />
           <Route element={<Signup />} path="/signup" />
