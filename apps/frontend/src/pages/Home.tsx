@@ -15,12 +15,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { CredentialsI } from "@repo/db";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DialogClose } from "@radix-ui/react-dialog";
 import axios from "axios";
+import { useState } from "react";
 
-const  Home = () => {
+const Home = () => {
+  const [credApis, setCredApis] = useState<CredentialsI[]>([]);
+  const [credName, setCredName] = useState<string>("");
+  const [currCredApi, setCredCurrApi] = useState<CredentialsI | null>(null);
+
+  console.log(credApis, credName, currCredApi)
+  
   return (
     <div className=" min-h-screen w-full ">
       <div>
@@ -32,7 +40,15 @@ const  Home = () => {
             </Button>
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="px-1 py-1 my-2 mx-2 md:cursor-pointer border-2 border-b-3 border-neutral-800 hover:bg-[#f7f1e6] bg-white text-black hover:text-black transition-colors items-center flex rounded-md">
+                <Button
+                  onClick={async () => {
+                    const res = await axios.get(
+                      "http://localhost:8888/api/v1/cred/get-all"
+                    );
+                    setCredApis(res.data.data);
+                  }}
+                  className="px-1 py-1 my-2 mx-2 md:cursor-pointer border-2 border-b-3 border-neutral-800 hover:bg-[#f7f1e6] bg-white text-black hover:text-black transition-colors items-center flex rounded-md"
+                >
                   Add Credentials
                 </Button>
               </DialogTrigger>
@@ -43,16 +59,17 @@ const  Home = () => {
                     <Select
                       onValueChange={(value) => {
                         console.log("Selected credential:", value);
+                        setCredName(value);
                       }}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select Credentials" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="telegram">TelegramApi</SelectItem>
-                        <SelectItem value="whatsapp">WhatsAppApi</SelectItem>
-                        <SelectItem value="gmail">GmailApi</SelectItem>
-                        <SelectItem value="openai">OpenAiApi</SelectItem>
+                        <SelectItem value="telegramApi">Telegram Api</SelectItem>
+                        {/* <SelectItem value="whatsapp">WhatsAppApi</SelectItem>
+                        <SelectItem value="gmail">GmailApi</SelectItem> */}
+                        <SelectItem value="openAiApi">OpenAi</SelectItem>
                       </SelectContent>
                     </Select>
                   </DialogDescription>
@@ -61,12 +78,19 @@ const  Home = () => {
                   <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                   </DialogClose>
-                  <Button type="submit" 
-                  onClick={async()=>{
-                      const res = await axios.get('http://localhost:8888/api/v1/cred/get-all');
+                  <Button
+                    className="cursor-pointer "
+                    type="submit"
+                    onClick={() => {
+                      const res = credApis.filter(
+                        (credApi) => credApi.name === credName
+                      );
                       console.log(res)
-                  }}
-                  >Save changes</Button>
+                      setCredCurrApi(res[0])
+                    }}
+                  >
+                    Continue{" "}
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
