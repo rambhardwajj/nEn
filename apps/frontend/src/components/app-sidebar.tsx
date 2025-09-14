@@ -17,11 +17,10 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { Button } from "./ui/button";
 import { NavLink } from "react-router-dom";
 
-// Menu items.
 const items = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "/",
     icon: Home,
   },
   {
