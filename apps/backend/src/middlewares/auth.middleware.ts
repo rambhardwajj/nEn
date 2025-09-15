@@ -11,15 +11,16 @@ export const isLoggedIn = async (
   next: NextFunction
 ) => {
   const { accessToken } = req.cookies;
+  console.log(req.cookies)
   if (!accessToken) throw new CustomError(404, "No Access token in middleware");
 
   try {
-    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!);
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!);
     req.user = decoded as decodedUser;
     next();
-  } catch (error) {
+  } catch (error:any) {
     if (error instanceof TokenExpiredError) {
-      throw new CustomError(401, error.name);
+      throw new CustomError(401, error.message);
     }
     throw new CustomError(401, "Invalid or expired token");
   }

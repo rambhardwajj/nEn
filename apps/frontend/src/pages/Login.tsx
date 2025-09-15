@@ -34,11 +34,14 @@ const Login = () => {
           </div>
           <div>
             <button className=" m-5 px-10 py-2 bg-green-200 rounded-lg "
-              onClick={async () =>{
+              onClick={async () => {
                 const res = await axios.post('http://localhost:8888/api/v1/auth/signin', {
                   email,
                   password
                 },
+                {
+                  withCredentials: true
+                }
               )
               console.log(res.data);
               }}

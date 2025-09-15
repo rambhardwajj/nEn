@@ -1,6 +1,6 @@
 
 import { PrismaClient } from "@prisma/client";
-export  type{ CredentialsI,PropertiesI } from "./types"
+export  type{ CredentialsI,PropertiesI, CredentialSubmitPayload , UserCredentials } from "./types"
 
 export const prisma = new PrismaClient();
 

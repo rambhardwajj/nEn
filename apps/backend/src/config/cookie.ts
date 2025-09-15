@@ -6,9 +6,9 @@ interface CookieOptionsArgs {
 export function generateCookieOptions() {
   const expiry = "7d";
   return {
-    httpOnly: true,
+    // httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "none" as const,
+    // sameSite: "none" as const,
     maxAge: ms(expiry as StringValue),
   };
 }

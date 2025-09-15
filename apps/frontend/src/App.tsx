@@ -1,10 +1,11 @@
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import Home from "./pages/Home";
+import Home from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { SidebarProvider } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
+import WorkflowPage from "./pages/WorkflowPage";
 
 function App() {
   return (
@@ -19,6 +20,15 @@ function App() {
               </>
             }
             path="/"
+          />
+          <Route
+            element={
+              <>
+                <AppSidebar /> 
+                <WorkflowPage />
+              </>
+            }
+            path="/workflow"
           />
 
           <Route element={<Login />} path="/login" />
