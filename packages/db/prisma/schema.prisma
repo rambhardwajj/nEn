@@ -17,47 +17,58 @@ datasource db {
 enum Application {
   Telegram
   whatsapp
-  OpenAi 
+  OpenAi
   gmail
   resend
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  email              String    @unique
+  id                 String            @id @default(cuid())
+  email              String            @unique
   passwordHash       String?
   lastLoggedId       DateTime?
   refreshToken       String? // Hashed refresh token
   refreshTokenExpiry DateTime?
-  createdAt          DateTime? @default(now())
-  updatedAt          DateTime? @updatedAt
-  workflow           Workflow[] 
-  userCredentials    UserCredentials[]       
+  createdAt          DateTime?         @default(now())
+  updatedAt          DateTime?         @updatedAt
+  workflow           Workflow[]
+  userCredentials    UserCredentials[]
 }
 
 model Workflow {
-  id String @id @default(cuid())
-  userId String  
-  name  String 
-  isActive Boolean
-  tags String[]
-  nodes Json[]
-  edges Json[] 
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  isActive  Boolean
+  tags      String[]
+  nodes     Json[]
+  edges     Json[]
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete:Cascade )
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model UserCredentials{
-  id String @id @default(cuid())
-  name String 
-  type String? 
-  userId String
+model UserCredentials {
+  id        String   @id @default(cuid())
+  name      String
+  type      String?
+  apiName   String?
+  appIcon   String?
+  userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
-  data Json 
+  data      Json
 
-  user User @relation(fields: [userId], references: [id] , onDelete: Cascade )
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AvailabeTriggers {
+  id          String   @unique @default(uuid())
+  name        String
+  type        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
 }
 

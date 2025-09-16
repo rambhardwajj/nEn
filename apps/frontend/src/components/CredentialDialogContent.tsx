@@ -60,6 +60,7 @@ export function CredentialDialogContent({
     const payload: CredentialSubmitPayload = {
       name: currCredApi.displayName,
       apiName: currCredApi.name,
+      appIcon: currCredApi.iconUrl,
       data: formValues,
     };
 

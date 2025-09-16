@@ -15,10 +15,14 @@ app.use(
 
 import authRouter from "./routes/auth.routes";
 import credRouter from "./routes/cred.routes";
+import triggerRouter from "./routes/triggers.routes"
+import workflowRouter from "./routes/workflow.routes"
 import { errorHandler } from "./middlewares/error.middleware";
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/cred", credRouter);
+app.use("/api/v1/trigger", triggerRouter)
+app.use('/api/v1/workflow',workflowRouter )
 
 app.listen(8888, () => {
   console.log("app is listening on port ", 8888);

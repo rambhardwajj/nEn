@@ -21,12 +21,15 @@ export interface PropertiesI {
 export type CredentialSubmitPayload = {
   name: string;       
   apiName: string;     
+  appIcon: string,
   data: Record<string, any>; 
 };
 
 export type UserCredentials = {
   id : string;
   name: string;
+  appIcon: string;
+  apiName:string;
   type: string;
   userId :string;
   createdAt?: Date;
