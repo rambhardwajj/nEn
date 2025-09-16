@@ -107,7 +107,9 @@ const WorkflowPage = () => {
         }
       );
 
-      alert("Workflow saved successfully!");
+      if (res) {
+        alert("Workflow saved successfully!");
+      }
     } catch (error) {
       console.error("Failed to save workflow:", error);
       alert("Failed to save workflow");
@@ -162,13 +164,13 @@ const WorkflowPage = () => {
 
         setNodes((nds) =>
           nds.map((node) =>
-            node.id === "1" // Adding the triggers and callback function to 1st Node 
+            node.id === "1" // Adding the triggers and callback function to 1st Node
               ? {
                   ...node,
                   data: {
                     ...node.data,
-                    triggers: res.data.data, // this helps  trigger Sheet Node to display triggers in sheet 
-                    onSelectTrigger: handleSelectTrigger, // this callback helps the sheet comp to run the handleSelectTrigger function to create a new Node 
+                    triggers: res.data.data, // this helps  trigger Sheet Node to display triggers in sheet
+                    onSelectTrigger: handleSelectTrigger, // this callback helps the sheet comp to run the handleSelectTrigger function to create a new Node
                   },
                 }
               : node

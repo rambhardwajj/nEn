@@ -47,7 +47,6 @@ export function WorkflowNavbar({
           </span>
         </div>
 
-        {/* Save Button */}
         <Button
           onClick={onSave}
           className="bg-teal-500 hover:bg-teal-600 text-white px-3 sm:px-4 py-2 flex items-center gap-2 transition-colors"

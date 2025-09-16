@@ -11,7 +11,6 @@ export const isLoggedIn = async (
   next: NextFunction
 ) => {
   const { accessToken } = req.cookies;
-  console.log(req.cookies)
   if (!accessToken) throw new CustomError(404, "No Access token in middleware");
 
   try {

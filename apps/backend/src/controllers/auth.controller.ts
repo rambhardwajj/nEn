@@ -69,7 +69,6 @@ export const signin: RequestHandler = asyncHandler(async (req, res) => {
   if (!email || !password) {
     throw new CustomError(400, "Email and password are required");
   }
-  console.log(email, password);
 
   const user = await prisma.user.findUnique({
     where: { email },

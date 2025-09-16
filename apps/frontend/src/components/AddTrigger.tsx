@@ -47,18 +47,17 @@ export function AddTrigger({ data }: { data: AddTriggerNodeData }) {
   };
 
   return (
-    <div className="bg-teal-50 border border-dashed py-4 border-teal-400 rounded-xl shadow-md flex flex-col items-center justify-center gap-2 w-[120px]">
+    <div className="bg-teal-50 border border-dashed py-4  border-teal-400 rounded-lg shadow-md flex flex-col items-center justify-center gap-2 w-[80px]">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <button className="cursor-pointer px-2 py-1 rounded-sm bg-teal-500 hover:bg-teal-600 text-white font-medium transition-all duration-200 shadow">
+          <button className="cursor-pointer w-[60px] px-2 py-1 text-[10px] rounded-sm bg-teal-500 hover:bg-teal-600 text-white  transition-all duration-200 shadow">
             Trigger
           </button>
         </SheetTrigger>
         <SheetContent className="sm:max-w-[500px]">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-1">
-              <Zap className="w-5 h-5 text-teal-600" />
-              Available Triggers
+               Available Triggers
             </SheetTitle>
             <SheetDescription>
               Select a trigger to start your workflow. Each trigger responds to
