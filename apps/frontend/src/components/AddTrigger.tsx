@@ -8,15 +8,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { AddTriggerNodeData } from "@/pages/WorkflowPage";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { Zap, Webhook, Clock, Hand } from "lucide-react";
+import { useWorkflowStore, type TriggerI } from "@/store/workflowStore"; 
 
-export function AddTrigger({ data }: { data: AddTriggerNodeData }) {
+export interface AddTriggerNodeData {
+  label: string;
+}
+
+export function AddTrigger() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const getTriggerIcon = (type: string) => {
+   const getTriggerIcon = (type: string) => {
     switch (type?.toLowerCase()) {
       case "manual":
         return <Hand className="w-5 h-5 text-blue-600" />;
@@ -41,23 +45,25 @@ export function AddTrigger({ data }: { data: AddTriggerNodeData }) {
     }
   };
 
-  const handleTriggerSelect = (trigger: any) => {
-    data?.onSelectTrigger?.(trigger);
+  const triggers = useWorkflowStore((state) => state.triggers);
+  const addTriggerNode = useWorkflowStore((state) => state.addTriggerNode);
+  const handleTriggerSelect = (trigger: TriggerI) => {
+    addTriggerNode(trigger);
     setIsOpen(false);
   };
 
   return (
-    <div className="bg-teal-50 border border-dashed py-4  border-teal-400 rounded-lg shadow-md flex flex-col items-center justify-center gap-2 w-[80px]">
+    <div className="bg-teal-50 border border-dashed py-4 border-teal-400 rounded-lg shadow-md flex flex-col items-center justify-center gap-2 w-[80px]">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <button className="cursor-pointer w-[60px] px-2 py-1 text-[10px] rounded-sm bg-teal-500 hover:bg-teal-600 text-white  transition-all duration-200 shadow">
+          <button className="cursor-pointer w-[60px] px-2 py-1 text-[10px] rounded-sm bg-teal-500 hover:bg-teal-600 text-white transition-all duration-200 shadow">
             Trigger
           </button>
         </SheetTrigger>
         <SheetContent className="sm:max-w-[500px]">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-1">
-               Available Triggers
+              Available Triggers
             </SheetTitle>
             <SheetDescription>
               Select a trigger to start your workflow. Each trigger responds to
@@ -66,8 +72,8 @@ export function AddTrigger({ data }: { data: AddTriggerNodeData }) {
           </SheetHeader>
 
           <div className="space-y-2 mt-2 max-h-[70vh] overflow-y-auto">
-            {data.triggers && data.triggers.length > 0 ? (
-              data.triggers.map((trigger, idx) => (
+            {triggers && triggers.length > 0 ? (
+              triggers.map((trigger, idx) => (
                 <div
                   key={trigger.id || idx}
                   className="group mx-4 p-2 border border-gray-200 rounded-lg hover:border-teal-300 hover:shadow-md cursor-pointer transition-all duration-200 bg-white hover:bg-teal-50"
@@ -117,11 +123,9 @@ export function AddTrigger({ data }: { data: AddTriggerNodeData }) {
             )}
           </div>
 
-          <SheetFooter className="mt-6  border-t">
+          <SheetFooter className="mt-6 border-t">
             <SheetClose asChild>
-              <Button  className=" bg-teal-900 w-full sm:w-auto">
-                Close
-              </Button>
+              <Button className="bg-teal-900 w-full sm:w-auto">Close</Button>
             </SheetClose>
           </SheetFooter>
         </SheetContent>

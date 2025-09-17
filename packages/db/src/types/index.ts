@@ -3,6 +3,7 @@ export interface CredentialsI {
   documentationUrl: string;
   iconUrl: string;
   name: string;
+  application: string;
   properties: PropertiesI[];
   supportedNodes: string[];
 }
@@ -22,6 +23,7 @@ export type CredentialSubmitPayload = {
   name: string;       
   apiName: string;     
   appIcon: string,
+  application: string,
   data: Record<string, any>; 
 };
 
@@ -30,6 +32,7 @@ export type UserCredentials = {
   name: string;
   appIcon: string;
   apiName:string;
+  application:string;
   type: string;
   userId :string;
   createdAt?: Date;

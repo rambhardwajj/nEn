@@ -61,6 +61,7 @@ export function CredentialDialogContent({
       name: currCredApi.displayName,
       apiName: currCredApi.name,
       appIcon: currCredApi.iconUrl,
+      application: currCredApi.application,
       data: formValues,
     };
 
@@ -73,6 +74,8 @@ export function CredentialDialogContent({
         { withCredentials: true }
       );
       console.log("saved", res.data);
+      if(res)
+        alert("Credentials created successfully")
     } catch (error) {
       console.error("Error saving credential:", error);
     }
@@ -89,7 +92,7 @@ export function CredentialDialogContent({
               if (selected) {
                 setCredName(value);
                 setCredCurrApi(selected);
-                setFormValues({}); // reset form when new app selected
+                setFormValues({}); 
               }
             }}
           >

@@ -6,11 +6,13 @@ import { returnSaveCred } from "../utils/handleSaveCred";
 import { prisma } from "@repo/db";
 import z from "zod";
 import { CustomError } from "../utils/CustomError";
+import { application } from "express";
 
 const createCredentialsSchema = z.object({
   name: z.string(),
   type: z.string().optional(),
   appIcon: z.string().optional(),
+  application : z.string().optional(),
   apiName: z.string().optional(),
   data: z.object({
     accessToken: z.string().optional(),
@@ -45,6 +47,7 @@ export const createCredentials = asyncHandler(async (req, res) => {
       name: credData.data!.name,
       apiName: credData.data.apiName,
       appIcon: credData.data.appIcon,
+      application: credData.data.application,
       userId: userId,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
@@ -65,6 +68,7 @@ const updateCredentialsSchema = z.object({
   type: z.string().nullable().optional(),
   appIcon: z.string().optional(),
   apiName: z.string().optional(),
+  application: z.string().optional(),
   data: z
     .object({
       accessToken: z.string().optional(),

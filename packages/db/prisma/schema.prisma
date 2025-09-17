@@ -54,6 +54,7 @@ model UserCredentials {
   name      String
   type      String?
   apiName   String?
+  application String?
   appIcon   String?
   userId    String
   createdAt DateTime @default(now())
@@ -72,3 +73,7 @@ model AvailabeTriggers {
   updatedAt   DateTime @default(now())
 }
 
+model Project {
+  id String @unique @default(uuid())
+  
+}
