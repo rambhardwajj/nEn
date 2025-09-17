@@ -40,7 +40,7 @@ export const generateRefreshToken = (user: any) =>
 export const signup: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    console.log(email, password);
+    // console.log(email, password);
 
     let existingUser;
     const user = await prisma.user.findUnique({
@@ -95,7 +95,7 @@ export const signin: RequestHandler = asyncHandler(async (req, res) => {
     data: { refreshToken: hashedRefreshToken, refreshTokenExpiry: expiresAt },
   });
 
-  console.log(accessToken)
+  // console.log(accessToken)
 
   res
     .status(200)

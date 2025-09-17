@@ -57,13 +57,12 @@ export function WorkflowNavbar({
       type: data.action.type,
       application: data.action.application,
 
-      config: data.formData,
+      parameters: data.formData,
       credentials: data.credentials,
       metadata: data.metadata,
-      actionDefinition: data.action,
+      actionDefination: data.action,
     });
 
-    // Reset dialog state and close
     setDialogState("actions");
     setSelectedAction(null);
     setIsDialogOpen(false);

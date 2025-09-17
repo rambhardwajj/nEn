@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import {
   ArrowLeft,
-  Clock,
   Database,
   Mail,
   MessageSquare,
@@ -28,7 +27,7 @@ export const availableActions: ActionI[] = [
   {
     id: "telegram-message",
     name: "Telegram",
-    type: "message",
+    type: "TelegramNodeType",
     application: "Telegram",
     description: "Send a message to a Telegram chat",
     icon: <MessageSquare className="w-5 h-5" />,
@@ -37,7 +36,7 @@ export const availableActions: ActionI[] = [
   {
     id: "open-ai",
     name: "OpenAi",
-    type: "ai",
+    type: "openAiNodeType",
     application: "OpenAi",
     description: "Execute a llm call",
     icon: <Database className="w-5 h-5" />,
@@ -46,7 +45,7 @@ export const availableActions: ActionI[] = [
   {
     id: "gmail",
     name: "Send an Email",
-    type: "message",
+    type: "GmailNodeType",
     application: "Gmail",
     description: "Send an email",
     icon: <Mail className="w-5 h-5" />,
@@ -55,19 +54,12 @@ export const availableActions: ActionI[] = [
   {
     id: "webhook-call",
     name: "Call Webhook",
-    type: "webhook",
+    type: "WebHookNodeType",
     description: "Make an HTTP request to an external API",
     icon: <Webhook className="w-5 h-5" />,
     category: "Integration",
   },
-  {
-    id: "delay-action",
-    name: "Delay",
-    type: "operation",
-    description: "Wait for a specified amount of time",
-    icon: <Clock className="w-5 h-5" />,
-    category: "Flow Control",
-  },
+ 
 ];
 
 export const ActionForm = ({
@@ -256,7 +248,7 @@ export const ActionForm = ({
                 required={field.required}
               >
                 <option value="">Select {field.label}</option>
-                {field.options?.map((option) => (
+                {field.options?.map((option:any) => (
                   <option key={option} value={option}>
                     {option}
                   </option>

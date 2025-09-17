@@ -129,7 +129,6 @@ export const useWorkflowStore = create<WorkflowState>()(
       setTriggers: (triggers) => {
         set({ triggers });
         
-        // Update the addTrigger node with new triggers
         set((state) => ({
           nodes: state.nodes.map((node) =>
             node.id === "1"
@@ -181,6 +180,9 @@ export const useWorkflowStore = create<WorkflowState>()(
           data: {
             label: actionData.name || "Action",
             actionType: actionData.type,
+            application: actionData.application,
+            credentials: actionData.credentials,
+            metadata: actionData.metadata,
             ...actionData,
           },
         };

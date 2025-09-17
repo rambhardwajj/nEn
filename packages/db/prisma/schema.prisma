@@ -39,8 +39,8 @@ model Workflow {
   id        String   @id @default(cuid())
   userId    String
   name      String
-  isActive  Boolean
-  tags      String[]
+  active    Boolean
+  tags      String[] @default([])
   nodes     Json[]
   edges     Json[]
   createdAt DateTime @default(now())
@@ -50,16 +50,16 @@ model Workflow {
 }
 
 model UserCredentials {
-  id        String   @id @default(cuid())
-  name      String
-  type      String?
-  apiName   String?
+  id          String   @id @default(cuid())
+  name        String
+  type        String?
+  apiName     String?
   application String?
-  appIcon   String?
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  data      Json
+  appIcon     String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  data        Json
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -75,5 +75,4 @@ model AvailabeTriggers {
 
 model Project {
   id String @unique @default(uuid())
-  
 }

@@ -6,7 +6,6 @@ import { returnSaveCred } from "../utils/handleSaveCred";
 import { prisma } from "@repo/db";
 import z from "zod";
 import { CustomError } from "../utils/CustomError";
-import { application } from "express";
 
 const createCredentialsSchema = z.object({
   name: z.string(),
@@ -27,9 +26,7 @@ const createCredentialsSchema = z.object({
 
 export const getCredentialApis = asyncHandler(async (req, res) => {
   const credFilePath = path.join(process.cwd(), "src", "credentials.json");
-  console.log(credFilePath);
   const fileData = fs.readFileSync(credFilePath, "utf-8");
-  console.log(fileData);
   const data = JSON.parse(fileData);
 
   res.status(200).json(new ApiResponse(200, "path", data));
@@ -85,7 +82,7 @@ const updateCredentialsSchema = z.object({
 
 export const updateCredential = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  console.log(req.body)
+  // console.log(req.body)
   const credData = updateCredentialsSchema.safeParse(req.body);
   const { credId } = req.params;
   if(credData.error){
@@ -127,7 +124,7 @@ export const getAllCredentials = asyncHandler(async ( req, res) =>{
     }
   })
 
-  console.log(allUserCred);
+  // console.log(allUserCred);
 
   res.status(200).json(new ApiResponse(200, "Retrieved all the credentionls for the user",allUserCred ))
 })
