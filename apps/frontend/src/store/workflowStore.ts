@@ -24,6 +24,7 @@ export interface WorkflowState {
   // Core workflow data
   nodes: Node[];
   edges: Edge[];
+  workflowId?: string; // Add workflow ID for tracking
   
   // UI state
   isWorkflowActive: boolean;
@@ -45,6 +46,7 @@ export interface WorkflowState {
   // Actions for workflow management 
   setIsWorkflowActive: (active: boolean) => void;
   setProjectName: (name: string) => void;
+  resetWorkflow: () => void; // Reset to initial state
   
   // Actions for triggers
   setTriggers: (triggers: TriggerI[]) => void;
@@ -54,7 +56,8 @@ export interface WorkflowState {
   setUserCredentials: (credentials: UserCredentials[]) => void;
   
   // Async actions
-  saveWorkflow: () => Promise<void>;
+  saveWorkflow: (workflowId?: string) => Promise<string | null>; // Return workflow ID
+  loadWorkflow: (workflowId: string) => Promise<void>; // Load specific workflow
   loadTriggers: () => Promise<void>;
   loadUserCredentials: () => Promise<void>;
   
@@ -90,9 +93,9 @@ const getNodeType = (triggerType: string) => {
 export const useWorkflowStore = create<WorkflowState>()(
   devtools(
     (set, get) => ({
-      // Initial state
       nodes: initialNodes,
       edges: [],
+      workflowId: undefined,
       isWorkflowActive: false,
       projectName: "My Workflow Project",
       triggers: [],
@@ -117,15 +120,22 @@ export const useWorkflowStore = create<WorkflowState>()(
         }));
       },
 
-      // Workflow management
       setIsWorkflowActive: (active) => {
         set({ isWorkflowActive: active });
       },
       setProjectName: (name) => {
         set({ projectName: name });
       },
+      resetWorkflow: () => {
+        set({
+          nodes: initialNodes,
+          edges: [],
+          workflowId: undefined,
+          isWorkflowActive: false,
+          projectName: "My Workflow Project",
+        });
+      },
 
-      // Trigger management
       setTriggers: (triggers) => {
         set({ triggers });
         
@@ -158,9 +168,10 @@ export const useWorkflowStore = create<WorkflowState>()(
             triggerId: trigger.id,
           },
         };
-
-        set((state) => ({
-          nodes: [...state.nodes, newNode]
+        
+        const newNodes = nodes.filter((node) => node.id !== "1")
+        set(() => ({
+          nodes: [...newNodes, newNode]
         }));
       },
 
@@ -192,8 +203,7 @@ export const useWorkflowStore = create<WorkflowState>()(
         }));
       },
 
-      // Async actions
-      saveWorkflow: async () => {
+      saveWorkflow: async (workflowId?: string) => {
         const { nodes, edges, projectName, isWorkflowActive } = get();
         
         set({ isSaving: true });
@@ -206,20 +216,66 @@ export const useWorkflowStore = create<WorkflowState>()(
             active: isWorkflowActive,
           };
 
-          const res = await axios.post(
-            "http://localhost:8888/api/v1/workflow/save",
-            workflow,
-            { withCredentials: true }
-          );
+          let res;
+          if (workflowId) {
+            console.log("in update ")
+            res = await axios.put(
+              `http://localhost:8888/api/v1/workflow/${workflowId}`,
+              workflow,
+              { withCredentials: true }
+            );
+          } else {
+            console.log("in create")
+            res = await axios.post(
+              "http://localhost:8888/api/v1/workflow/save",
+              workflow,
+              { withCredentials: true }
+            );
 
-          if (res) {
+            console.log(res)
+          }
+
+          if (res && res.data) {
+            const savedWorkflowId = res.data.workflowId || res.data.data?.workflowId;
+            console.log(savedWorkflowId)
+            set({ workflowId: savedWorkflowId });
             alert("Workflow saved successfully!");
+            return savedWorkflowId;
           }
         } catch (error) {
           console.error("Failed to save workflow:", error);
           alert("Failed to save workflow");
+          return null;
         } finally {
           set({ isSaving: false });
+        }
+        return null;
+      },
+
+      loadWorkflow: async (workflowId: string) => {
+        set({ isLoading: true });
+        
+        try {
+          const res = await axios.get(
+            `http://localhost:8888/api/v1/workflow/${workflowId}`,
+            { withCredentials: true }
+          );
+          
+          if (res.data && res.data.data) {
+            const workflow = res.data.data;
+            set({
+              workflowId: workflowId,
+              nodes: workflow.nodes || initialNodes,
+              edges: workflow.edges || [],
+              projectName: workflow.name || "Loaded Workflow",
+              isWorkflowActive: workflow.active || false,
+            });
+          }
+        } catch (error) {
+          console.error("Failed to load workflow:", error);
+          alert("Failed to load workflow");
+        } finally {
+          set({ isLoading: false });
         }
       },
 

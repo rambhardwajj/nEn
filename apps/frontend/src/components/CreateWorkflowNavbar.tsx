@@ -9,23 +9,21 @@ import { DialogTitle } from "@radix-ui/react-dialog";
 import { useWorkflowStore } from "@/store/workflowStore";
 import { useNavigate } from "react-router-dom";
 
-interface WorkflowNavbarProps {
+interface CreateWorkflowNavbarProps {
   projectName?: string;
   isActive?: boolean;
   onSave?: () => void;
   onActiveToggle?: (active: boolean) => void;
   isSaving?: boolean;
-  isViewMode?: boolean; 
 }
 
-export function WorkflowNavbar({
-  projectName = "My Project Name",
+export function CreateWorkflowNavbar({
+  projectName = "New Workflow",
   isActive = false,
   onSave,
   onActiveToggle,
   isSaving = false,
-  isViewMode = false,
-}: WorkflowNavbarProps) {
+}: CreateWorkflowNavbarProps) {
   const navigate = useNavigate();
   const [dialogState, setDialogState] = useState("actions");
   const [selectedAction, setSelectedAction] = useState<ActionI | null>(null);
@@ -95,11 +93,6 @@ export function WorkflowNavbar({
         <h1 className="text-md font-semibold text-gray-900 truncate">
           {projectName}
         </h1>
-        {isViewMode && (
-          <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-            Saved
-          </span>
-        )}
       </div>
 
       <div className="flex items-center gap-4">
@@ -117,7 +110,6 @@ export function WorkflowNavbar({
           </span>
         </div>
 
-        {/* Only show Add Action in view mode or if not in view mode */}
         <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>
             <Button className="bg-white text-black cursor-pointer border-1 border-b-3 hover:bg-teal-100 border-neutral-700">
@@ -169,7 +161,7 @@ export function WorkflowNavbar({
             <Save className="w-4 h-4" />
           )}
           <span className="hidden sm:inline">
-            {isSaving ? (isViewMode ? "Updating..." : "Saving...") : (isViewMode ? "Update" : "Save")}
+            {isSaving ? "Creating..." : "Create Workflow"}
           </span>
         </Button>
       </div>

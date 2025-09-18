@@ -1,8 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 import type { CredentialsI } from "@repo/db";
 
@@ -26,7 +23,7 @@ const Home = () => {
         <div className="w-full flex items-center justify-between px-3 mt-1 border-b ">
           <div>Your WorkFlows...</div>
           <div className="flex gap-1">
-            <Link to={"/workflow"}>
+            <Link to={"/create"}>
               <Button className='className="px-1 py-1 my-2 mx-2 md:cursor-pointer border-2 border-b-3 border-neutral-800 hover:bg-teal-50 bg-white text-black hover:text-black transition-colors items-center flex rounded-md'>
                 Create Workflow
               </Button>

@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import { SidebarProvider } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
 import WorkflowPage from "./pages/WorkflowPage";
+import CreateWorkflowPage from "./pages/CreateWorkflowPage";
 
 function App() {
   return (
@@ -21,6 +22,19 @@ function App() {
             }
             path="/"
           />
+          
+          {/* Create new workflow route */}
+          <Route
+            element={
+              <>
+                <AppSidebar /> 
+                <CreateWorkflowPage />
+              </>
+            }
+            path="/create"
+          />
+          
+          {/* View existing workflow route */}
           <Route
             element={
               <>
@@ -28,7 +42,7 @@ function App() {
                 <WorkflowPage />
               </>
             }
-            path="/workflow"
+            path="/workflow/:workflowId"
           />
 
           <Route element={<Login />} path="/login" />

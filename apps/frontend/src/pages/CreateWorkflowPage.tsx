@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   ReactFlow,
   type FitViewOptions,
@@ -15,10 +15,9 @@ import { AddTrigger } from "@/components/AddTrigger";
 import { ManualTriggerNode } from "@/components/nodeComponents/ManualTriggerNode";
 import { ScheduledTriggerNode } from "@/components/nodeComponents/ScheduleTrigger";
 import { WebhookTriggerNode } from "@/components/nodeComponents/WebhookTrigger";
-import { WorkflowNavbar } from "@/components/WorkflowNavbar";
+import { CreateWorkflowNavbar } from "@/components/CreateWorkflowNavbar";
 import { useWorkflowStore } from "@/store/workflowStore";
 
-// Node configuration
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
 };
@@ -35,10 +34,9 @@ const nodeTypes = {
   webhookTrigger: WebhookTriggerNode,
 };
 
-const WorkflowPage = () => {
-  const { workflowId } = useParams();
+const CreateWorkflowPage = () => {
+  const navigate = useNavigate();
   
-  // Get all needed state and actions from Zustand store
   const {
     nodes,
     edges,
@@ -49,43 +47,37 @@ const WorkflowPage = () => {
     onConnect,
     saveWorkflow,
     setIsWorkflowActive,
-    loadWorkflow,
+    loadTriggers,
+    loadUserCredentials,
     isSaving,
-    isLoading,
+    resetWorkflow, 
   } = useWorkflowStore();
 
   useEffect(() => {
-    if (workflowId) {
-      // Load the specific workflow when component mounts
-      loadWorkflow(workflowId);
-    }
-  }, [workflowId, loadWorkflow]);
+    resetWorkflow();
+    loadTriggers();
+    loadUserCredentials();
+  }, [resetWorkflow, loadTriggers, loadUserCredentials]);
 
   const handleSave = async () => {
     try {
-      await saveWorkflow(workflowId); // Pass workflowId for updating
+      const workflowId = await saveWorkflow(); 
+      if (workflowId) {
+        navigate(`/workflow/${workflowId}`);
+      }
     } catch (error) {
       console.error("Error saving workflow:", error);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="h-[100vh] w-[100vw] flex items-center justify-center">
-        <div className="text-lg">Loading workflow...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="h-[100vh] w-[100vw] relative">
-      <WorkflowNavbar
+      <CreateWorkflowNavbar
         projectName={projectName}
         isActive={isWorkflowActive}
         onSave={handleSave}
         onActiveToggle={setIsWorkflowActive}
         isSaving={isSaving}
-        isViewMode={true} // Add this prop to distinguish view mode
       />
       <ReactFlow
         className=""
@@ -112,4 +104,4 @@ const WorkflowPage = () => {
   );
 };
 
-export default WorkflowPage;
+export default CreateWorkflowPage;

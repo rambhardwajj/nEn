@@ -63,7 +63,6 @@ export interface NodeData {
   type?: string;
   parameters?: any;
   actionDefination?: any;
-
 }
 
 export interface INode {
