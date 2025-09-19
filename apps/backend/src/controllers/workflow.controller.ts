@@ -1,8 +1,21 @@
+import { uuidv4 } from "zod";
 import { ApiResponse } from "../utils/ApiResponse";
 import asyncHandler from "../utils/asyncHandler";
 import { CustomError } from "../utils/CustomError";
 import { WorkflowSchema } from "../utils/workflowSchema";
 import { PrismaClient } from "@prisma/client";
+import { createClient } from "redis";
+
+const publisherRedis = createClient({url: "redis://localhost:6379"})
+
+const connectRedis = async () =>{
+  try {
+    await publisherRedis.connect();
+  } catch (error) {
+   console.log("redis cannot connect",error) 
+  }
+}
+connectRedis();
 
 const prisma = new PrismaClient();
 
@@ -177,12 +190,78 @@ export const executeFlow = asyncHandler(async (req, res) => {
   try {
      workflow= await prisma.workflow.findFirst({
       where: {
-        id: workflowId
+        id: workflowId,
+        userId: userId
       }
      })
-
-     
   } catch (error) {
-    
+    throw new CustomError(401, "Error in geting workflow ")
   }
+
+  if( !workflow) throw new CustomError(404, "Workflow doesnot exists")
+
+try {
+    // Create execution job payload
+    const executionId = uuidv4(); 
+    
+    const executionJob = {
+      executionId: executionId,
+      workflowId: workflow.id,
+      userId: userId,
+      triggeredBy: "manual", 
+      triggeredAt: new Date().toISOString(),
+      workflow: {
+        id: workflow.id,
+        name: workflow.name,
+        nodes: workflow.nodes,
+        edges: workflow.edges,
+        active: workflow.active
+      },
+      status: "queued",
+      priority: "normal", 
+      metadata: {
+        source: "api",
+        userAgent: req.headers['user-agent'],
+        ip: req.ip
+      }
+    };
+
+    const queueName = "workflow:execution"; 
+    
+    const score = Date.now(); 
+    
+    await publisherRedis.zAdd(queueName, {
+      score: score,
+      value: JSON.stringify(executionJob)
+    });
+
+    await publisherRedis.hSet(
+      `execution:${executionId}`, 
+      {
+        status: "queued",
+        createdAt: new Date().toISOString(),
+        workflowId: workflowId,
+        userId: userId
+      }
+    );
+
+    await publisherRedis.expire(`execution:${executionId}`, 86400);
+
+    console.log(`Workflow ${workflowId} queued for execution with ID: ${executionId}`);
+
+    res.status(200).json(
+      new ApiResponse(200, "Workflow queued for execution successfully", {
+        executionId: executionId,
+        workflowId: workflowId,
+        status: "queued",
+        estimatedStartTime: "within 30 seconds"
+      })
+    );
+
+  } catch (error) {
+    console.error("Error queuing workflow for execution:", error);
+    throw new CustomError(500, "Failed to queue workflow for execution");
+  }
+
+  
 })

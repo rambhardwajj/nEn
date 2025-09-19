@@ -14,6 +14,6 @@ router.post('/save', isLoggedIn, saveWorkflow);
 router.get('/:workflowId', isLoggedIn, getWorkflowById);
 router.put('/:workflowId', isLoggedIn, updateWorkflow);
 router.get('/', isLoggedIn, getUserWorkflows);
-router.get('/execute/:workflowId', isLoggedIn, executeFlow)
+router.post('/execute/:workflowId', isLoggedIn, executeFlow)
 
 export default router;
