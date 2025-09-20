@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { ActionForm, availableActions, type ActionI } from "@/lib/Actions";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useWorkflowStore } from "@/store/workflowStore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 interface WorkflowNavbarProps {
   projectName?: string;
@@ -15,7 +16,7 @@ interface WorkflowNavbarProps {
   onSave?: () => void;
   onActiveToggle?: (active: boolean) => void;
   isSaving?: boolean;
-  isViewMode?: boolean; 
+  isViewMode?: boolean;
 }
 
 export function WorkflowNavbar({
@@ -76,7 +77,25 @@ export function WorkflowNavbar({
   };
 
   const handleBackToDashboard = () => {
-    navigate('/');
+    navigate("/");
+  };
+  const { workflowId } = useParams();
+  const handleExecution = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8888/api/v1/workflow/execute/${workflowId}`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (!res) alert("Error in execution");
+
+      console.log(res.data.data);
+    } catch (err) {
+      console.log("Error is execution", err);
+    }
   };
 
   return (
@@ -156,6 +175,12 @@ export function WorkflowNavbar({
             )}
           </DialogContent>
         </Dialog>
+        <Button
+          className="bg-teal-500 hover:bg-teal-600 text-white px-3 sm:px-4 py-2 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleExecution}
+        >
+          Run
+        </Button>
 
         <Button
           onClick={onSave}
@@ -169,7 +194,13 @@ export function WorkflowNavbar({
             <Save className="w-4 h-4" />
           )}
           <span className="hidden sm:inline">
-            {isSaving ? (isViewMode ? "Updating..." : "Saving...") : (isViewMode ? "Update" : "Save")}
+            {isSaving
+              ? isViewMode
+                ? "Updating..."
+                : "Saving..."
+              : isViewMode
+                ? "Update"
+                : "Save"}
           </span>
         </Button>
       </div>

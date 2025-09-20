@@ -50,6 +50,7 @@ const WorkflowPage = () => {
     saveWorkflow,
     setIsWorkflowActive,
     loadWorkflow,
+    loadUserCredentials,
     isSaving,
     isLoading,
   } = useWorkflowStore();
@@ -58,6 +59,7 @@ const WorkflowPage = () => {
     if (workflowId) {
       // Load the specific workflow when component mounts
       loadWorkflow(workflowId);
+      loadUserCredentials();
     }
   }, [workflowId, loadWorkflow]);
 
@@ -85,7 +87,7 @@ const WorkflowPage = () => {
         onSave={handleSave}
         onActiveToggle={setIsWorkflowActive}
         isSaving={isSaving}
-        isViewMode={true} // Add this prop to distinguish view mode
+        isViewMode={true} 
       />
       <ReactFlow
         className=""
