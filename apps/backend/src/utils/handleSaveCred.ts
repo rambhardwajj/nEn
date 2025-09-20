@@ -12,9 +12,7 @@ export const returnSaveCred = (userId: string, data: any) => {
       const res = {
         name: data.name,
         userId: userId,
-        
       }
-
     }
 
 };

@@ -37,7 +37,7 @@ export const UserCredentialsSchema = z.object({
   application: z.string(),
    type: z.string().nullable().optional(),
   userId: z.string(),
-  createdAt: z.coerce.date().optional(),  // accept string or Date
+  createdAt: z.coerce.date().optional(), 
   updatedAt: z.coerce.date().optional(),
   data: z.any()
 });

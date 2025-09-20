@@ -1,4 +1,3 @@
-import { uuidv4 } from "zod";
 import { ApiResponse } from "../utils/ApiResponse";
 import asyncHandler from "../utils/asyncHandler";
 import { CustomError } from "../utils/CustomError";
@@ -6,6 +5,7 @@ import { WorkflowSchema } from "../utils/workflowSchema";
 import { PrismaClient } from "@prisma/client";
 import { createClient } from "redis";
 import {} from "../utils/queueWorker"
+import { v4 as uuidv4 } from 'uuid';
 
 const publisherRedis = createClient({url: "redis://localhost:6379"})
 

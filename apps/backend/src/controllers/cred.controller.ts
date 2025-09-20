@@ -124,7 +124,5 @@ export const getAllCredentials = asyncHandler(async ( req, res) =>{
     }
   })
 
-  // console.log(allUserCred);
-
   res.status(200).json(new ApiResponse(200, "Retrieved all the credentionls for the user",allUserCred ))
 })
