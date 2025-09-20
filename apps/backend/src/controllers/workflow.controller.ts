@@ -5,6 +5,7 @@ import { CustomError } from "../utils/CustomError";
 import { WorkflowSchema } from "../utils/workflowSchema";
 import { PrismaClient } from "@prisma/client";
 import { createClient } from "redis";
+import {} from "../utils/queueWorker"
 
 const publisherRedis = createClient({url: "redis://localhost:6379"})
 
@@ -262,6 +263,4 @@ try {
     console.error("Error queuing workflow for execution:", error);
     throw new CustomError(500, "Failed to queue workflow for execution");
   }
-
-  
 })
