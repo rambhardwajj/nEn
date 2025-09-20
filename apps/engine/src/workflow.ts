@@ -47,7 +47,6 @@ export class Workflow {
 
     return processed.length !== this.nodes.size;
   }
-
   getExecutionOrder(): string[] {
     const tempInDegree = new Map(this.inDegree);
 
@@ -73,6 +72,7 @@ export class Workflow {
     }
     return order;
   }
+
   async executeNode(nodeId: string): Promise<void> {
     const node = this.nodes.get(nodeId);
     if (!node) {
@@ -81,6 +81,9 @@ export class Workflow {
     }
 
     console.log(`Executing node ${node.id} of type ${node.type}`);
+
+    console.log("--->>>>>>",this.executionData.executionId)
+
     this.eventPublisher.publish("workflow.event", {
       executionId: this.executionData.executionId,
       workflow: this.executionData.workflow.id,
@@ -102,8 +105,9 @@ export class Workflow {
         });
         console.log("manual trigger notif sent ");
       } else if (node.type === "action") {
-        //action stimulate
-        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // STIMULATIOM for an action
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         this.eventPublisher.publish("workflow.event", {
           executionId: this.executionData.executionId,
@@ -141,4 +145,5 @@ export class Workflow {
       await this.executeNode(nodeId);
     }
   }
+
 }

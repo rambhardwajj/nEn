@@ -18,6 +18,7 @@ const main = async () => {
   const res = await subscriberRedis.zPopMin("workflow:execution");
   if (!res) return;
   const exectionData = JSON.parse(res.value);
+  console.log("ExecutionDATA====>>>", exectionData)
   const workflowObj = new Workflow(exectionData);
 
   workflowObj.buildGraph();

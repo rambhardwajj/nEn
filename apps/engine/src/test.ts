@@ -14,7 +14,6 @@ const connectRedis = async () => {
 // Initialize connection
 connectRedis();
 
-// Simple function to check and process queue
 async function processQueue() {
     try {
         // Pop one job from the queue (lowest score = highest priority)
