@@ -1,13 +1,35 @@
+import { Workflow } from "./workflow";
 import { createClient } from "redis";
 
-const subscriberRedis = createClient({url: "redis://localhost:6379"});
+const subscriberRedis = createClient({ url: "redis://localhost:6379" });
 
-const connectRedis = async() =>{
-    try {
-        await subscriberRedis.connect();
-    } catch (error) {
-        console.log('subRedis not connected', error);
-    }
-}
-
+const connectRedis = async () => {
+  try {
+    await subscriberRedis.connect();
+    console.log("connected to redis");
+  } catch (error) {
+    console.log("subRedis not connected", error);
+  }
+};
 connectRedis();
+
+const main = async () => {
+    console.log("inside Engine")
+  const res = await subscriberRedis.zPopMin("workflow:execution");
+  if (!res) return;
+  const exectionData = JSON.parse(res.value);
+  const workflowObj = new Workflow(exectionData);
+
+  workflowObj.buildGraph();
+  if (workflowObj.detectCycle()) {
+    return;
+  }
+  workflowObj.getExecutionOrder();
+
+  console.log("executing the workflow ", exectionData.workflow.id)
+  workflowObj.execute();
+};
+
+setInterval(async () => {
+  await main();
+}, 3000);
