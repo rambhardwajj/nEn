@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import type { UserCredentials } from "@repo/db";
 import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Pencil, Save, X } from "lucide-react";
+import { Calendar, Pencil, Save } from "lucide-react";
 import {
   Dialog,
   DialogContent,

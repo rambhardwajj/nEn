@@ -17,8 +17,11 @@ import { ScheduledTriggerNode } from "@/components/nodeComponents/ScheduleTrigge
 import { WebhookTriggerNode } from "@/components/nodeComponents/WebhookTrigger";
 import { WorkflowNavbar } from "@/components/WorkflowNavbar";
 import { useWorkflowStore } from "@/store/workflowStore";
+import { Loader2 } from "lucide-react";
+import { ActionNode } from "@/components/nodeComponents/ActionNode";
 
-// Node configuration
+
+// ye  Node configuration
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
 };
@@ -33,15 +36,20 @@ const nodeTypes = {
   manualTrigger: ManualTriggerNode,
   scheduleTrigger: ScheduledTriggerNode,
   webhookTrigger: WebhookTriggerNode,
+  action: ActionNode,
 };
 
 const WorkflowPage = () => {
   const { workflowId } = useParams();
-  
-  // Get all needed state and actions from Zustand store
+
   const {
     nodes,
     edges,
+
+    nodeStatuses,
+    isExecuting,
+    executionEvents,
+
     isWorkflowActive,
     projectName,
     onNodesChange,
@@ -55,9 +63,49 @@ const WorkflowPage = () => {
     isLoading,
   } = useWorkflowStore();
 
+  const nodesWithStatus = nodes.map((node) => {
+    const status = nodeStatuses.get(node.id) || "idle";
+
+    let style = { ...node.style };
+    switch (status) {
+      case "running":
+        style = {
+          ...style,
+          backgroundColor: "#FFA500",
+          border: "2px solid #FF8C00",
+          boxShadow: "0 0 10px rgba(255, 165, 0, 0.5)",
+        };
+        break;
+      case "completed":
+        style = {
+          ...style,
+          backgroundColor: "#4CAF50",
+          border: "2px solid #45a049",
+          color: "white",
+        };
+        break;
+      case "failed":
+        style = {
+          ...style,
+          backgroundColor: "#F44336",
+          border: "2px solid #da190b",
+          color: "white",
+        };
+        break;
+      default:
+        style = {
+          ...style,
+          backgroundColor: "#FFFFFF",
+          border: "1px solid #ddd",
+        };
+    }
+
+    return { ...node, style };
+  });
+
   useEffect(() => {
     if (workflowId) {
-      // Load the specific workflow when component mounts
+      // loading  the specific workflow when component aata h
       loadWorkflow(workflowId);
       loadUserCredentials();
     }
@@ -65,7 +113,7 @@ const WorkflowPage = () => {
 
   const handleSave = async () => {
     try {
-      await saveWorkflow(workflowId); // Pass workflowId for updating
+      await saveWorkflow(workflowId); // pass workflowId for updating
     } catch (error) {
       console.error("Error saving workflow:", error);
     }
@@ -81,17 +129,27 @@ const WorkflowPage = () => {
 
   return (
     <div className="h-[100vh] w-[100vw] relative">
+      {isExecuting && (
+        <div className="absolute top-20 right-4 z-50 bg-orange-100 border border-orange-300 rounded-lg p-3 shadow-lg">
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin text-orange-600" />
+            <span className="text-orange-800 font-medium">
+              Executing Workflow...
+            </span>
+          </div>
+        </div>
+      )}
       <WorkflowNavbar
         projectName={projectName}
         isActive={isWorkflowActive}
         onSave={handleSave}
         onActiveToggle={setIsWorkflowActive}
         isSaving={isSaving}
-        isViewMode={true} 
+        isViewMode={true}
       />
       <ReactFlow
         className=""
-        nodes={nodes}
+        nodes={nodesWithStatus}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
@@ -110,6 +168,28 @@ const WorkflowPage = () => {
         <Background />
         <MiniMap nodeStrokeWidth={3} />
       </ReactFlow>
+
+      {executionEvents.length > 0 && (
+        <div className="absolute bottom-4 left-4 max-w-sm bg-white border rounded-lg shadow-lg p-4 max-h-40 overflow-y-auto">
+          <h4 className="font-medium mb-2">Execution Log:</h4>
+          {executionEvents.slice(-5).map((event, index) => (
+            <div key={index} className="text-xs text-gray-600 mb-1">
+              <span
+                className={`font-medium ${
+                  event.status === "started"
+                    ? "text-orange-600"
+                    : event.status === "completed"
+                      ? "text-green-600"
+                      : "text-red-600"
+                }`}
+              >
+                {event.status.toUpperCase()}
+              </span>
+              : {event.nodeId}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -200,7 +200,7 @@ export const ActionForm = ({
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto">
-        {schema.fields.map((field) => (
+        {schema.fields.map((field: any) => (
           <div key={field.name} className="space-y-2">
             <label className="text-sm font-medium text-gray-700">
               {field.label}

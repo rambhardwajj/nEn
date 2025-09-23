@@ -1,5 +1,7 @@
 import { type NodeData, type WorkflowExecutionData } from "./types";
 import { EventPublisher } from "./EventPublisher";
+import { ActionExecutor } from "./ActionExecutor";
+import { prisma } from "@repo/db";
 
 export class Workflow {
   private executionData: WorkflowExecutionData;
@@ -8,11 +10,16 @@ export class Workflow {
   private nodes: Map<string, NodeData>;
   private eventPublisher = new EventPublisher();
 
+  private actionExecutor: ActionExecutor;
+  private nodeOutputs: Map<string, any>;
+
   constructor(executionData: WorkflowExecutionData) {
     this.executionData = executionData;
     this.adjacencyList = new Map<string, string[]>();
     this.inDegree = new Map<string, number>();
     this.nodes = new Map<string, NodeData>();
+    this.actionExecutor = new ActionExecutor();
+    this.nodeOutputs = new Map();
   }
 
   buildGraph() {
@@ -72,17 +79,40 @@ export class Workflow {
     }
     return order;
   }
+  private async loadCredentials(): Promise<void> {
+    try {
+      console.log("Loading credentials for user:", this.executionData.userId);
+
+      const userCredentials = await prisma.userCredentials.findMany({
+        where: {
+          userId: this.executionData.userId,
+        },
+      });
+
+      console.log("Found credentials:", userCredentials);
+
+      const credMap = new Map();
+      userCredentials.forEach((cred) => {
+        console.log(`Mapping credential: ${cred.application} ->`, cred);
+        credMap.set(cred.application, cred);
+      });
+
+      console.log("Credential map:", credMap);
+      this.actionExecutor.setCredentials(credMap);
+    } catch (error) {
+      console.error("Failed to load credentials:", error);
+    }
+  }
 
   async executeNode(nodeId: string): Promise<void> {
     const node = this.nodes.get(nodeId);
+
     if (!node) {
       console.log("node not found ");
       return;
     }
 
     console.log(`Executing node ${node.id} of type ${node.type}`);
-
-    console.log("--->>>>>>",this.executionData.executionId)
 
     this.eventPublisher.publish("workflow.event", {
       executionId: this.executionData.executionId,
@@ -92,42 +122,98 @@ export class Workflow {
       status: "started",
     });
 
-    console.log(node);
     try {
-      if (node.type === "manualTrigger") {
-        console.log(node);
-        this.eventPublisher.publish("workflow.event", {
-          executionId: this.executionData.executionId,
-          workflow: this.executionData.workflow.id,
-          nodeId: node.id,
-          timeStamp: new Date(Date.now()),
-          status: "completed",
+      let output: any = null;
+
+      // handling diff node types
+      if (node.type === "webhookTrigger") {
+        const triggerData = (this.executionData as any).triggerData;
+
+        console.log("Webhook trigger executed with data:", {
+          payload: triggerData?.webhookPayload,
+          method: triggerData?.method,
+          query: triggerData?.queryParams,
         });
-        console.log("manual trigger notif sent ");
+
+        output = {
+          webhookPayload: triggerData?.webhookPayload,
+          triggerSource: triggerData?.ip,
+          method: triggerData?.method,
+          queryParams: triggerData?.queryParams,
+          headers: triggerData?.headers,
+          timestamp: new Date().toISOString(),
+        };
+
+        // store webhook output for other nodes to use
+        this.nodeOutputs.set(nodeId, output);
+      } else if (node.type === "manualTrigger") {
+        console.log("Manual trigger executed");
+
+        output = {
+          triggeredBy: "manual",
+          timestamp: new Date().toISOString(),
+          executionId: this.executionData.executionId,
+        };
+
+        this.nodeOutputs.set(nodeId, output);
       } else if (node.type === "action") {
+        if (!this.actionExecutor) {
+          await this.loadCredentials();
+        }
+        // preparing context from previous node outputs
+        const previousOutputs = Object.fromEntries(this.nodeOutputs);
+        console.log(`Executing action: ${node.data.actionType}`);
 
-        // STIMULATIOM for an action
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // execute the action using actionExecutor
+        output = await this.actionExecutor.executeAction(node, previousOutputs);
 
-        this.eventPublisher.publish("workflow.event", {
-          executionId: this.executionData.executionId,
-          workflow: this.executionData.workflow.id,
-          nodeId: node.id,
-          timeStamp: new Date(Date.now()),
-          status: "completed",
-        });
-        console.log("action trigger sent ");
+        // store the output for subsequent nodes
+        this.nodeOutputs.set(nodeId, output);
+
+        console.log(`Action ${node.data.actionType} completed:`, output);
+      } else {
+        // handling the unknown node types
+        console.log(`Unknown node type: ${node.type}`);
+        output = {
+          error: `Unknown node type: ${node.type}`,
+          timestamp: new Date().toISOString(),
+        };
       }
+
+      // publishing the success event
+      this.eventPublisher.publish("workflow.event", {
+        executionId: this.executionData.executionId,
+        workflow: this.executionData.workflow.id,
+        nodeId: node.id,
+        timeStamp: new Date(Date.now()),
+        status: "completed",
+        data: output,
+      });
     } catch (error: any) {
-      console.log("error in event ");
+      console.error(`Error executing node ${nodeId}:`, error);
+
+      const errorOutput = {
+        error: error.message,
+        timestamp: new Date().toISOString(),
+        nodeId: nodeId,
+      };
+
+      this.nodeOutputs.set(nodeId, errorOutput);
+
+      // publish thefailure event
       this.eventPublisher.publish("workflow.event", {
         executionId: this.executionData.executionId,
         workflow: this.executionData.workflow.id,
         nodeId: node.id,
         timeStamp: new Date(Date.now()),
         status: "failed",
-        data: { message: error.message },
+        data: {
+          message: error.message,
+          stack: error.stack,
+        },
       });
+
+      throw error;
     }
   }
   async execute(): Promise<void> {
@@ -135,15 +221,21 @@ export class Workflow {
 
     if (this.detectCycle()) {
       console.log("Workflow contains cycles");
+      return;
     }
 
+    await this.loadCredentials();
     const executionOrder = this.getExecutionOrder();
     console.log(executionOrder);
 
     for (let nodeId of executionOrder) {
-      console.log(nodeId);
-      await this.executeNode(nodeId);
+      try {
+        await this.executeNode(nodeId);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      } catch (error) {
+        console.error(`Workflow execution stopped at node ${nodeId}:`, error);
+        break;
+      }
     }
   }
-
 }

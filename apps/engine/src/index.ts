@@ -14,11 +14,12 @@ const connectRedis = async () => {
 connectRedis();
 
 const main = async () => {
-    console.log("inside Engine")
+  console.log("inside Engine");
   const res = await subscriberRedis.zPopMin("workflow:execution");
   if (!res) return;
+  
   const exectionData = JSON.parse(res.value);
-  console.log("ExecutionDATA====>>>", exectionData)
+  console.log("ExecutionDATA====>>>", exectionData);
   const workflowObj = new Workflow(exectionData);
 
   workflowObj.buildGraph();
@@ -27,8 +28,8 @@ const main = async () => {
   }
   workflowObj.getExecutionOrder();
 
-  console.log("executing the workflow ", exectionData.workflow.id)
-  workflowObj.execute();
+  console.log("executing the workflow ", exectionData.workflow.id);
+  await workflowObj.execute();
 };
 
 setInterval(async () => {

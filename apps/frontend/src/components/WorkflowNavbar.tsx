@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
 import { Save, Loader2, ArrowLeft } from "lucide-react";
@@ -7,8 +7,7 @@ import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { ActionForm, availableActions, type ActionI } from "@/lib/Actions";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useWorkflowStore } from "@/store/workflowStore";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface WorkflowNavbarProps {
   projectName?: string;
@@ -32,7 +31,13 @@ export function WorkflowNavbar({
   const [selectedAction, setSelectedAction] = useState<ActionI | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Get addActionNode from store
+  const {
+    executeWorkflowWithWebSocket,
+    isExecuting,
+    disconnectWebSocket,
+
+  } = useWorkflowStore();
+
   const addActionNode = useWorkflowStore((state) => state.addActionNode);
 
   const handleActionSelect = (action: ActionI) => {
@@ -79,24 +84,19 @@ export function WorkflowNavbar({
   const handleBackToDashboard = () => {
     navigate("/");
   };
-  const { workflowId } = useParams();
   const handleExecution = async () => {
     try {
-      const res = await axios.post(
-        `http://localhost:8888/api/v1/workflow/execute/${workflowId}`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (!res) alert("Error in execution");
-
-      console.log(res.data.data);
+      await executeWorkflowWithWebSocket();
     } catch (err) {
       console.log("Error is execution", err);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      disconnectWebSocket();
+    };
+  }, [disconnectWebSocket]);
 
   return (
     <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 h-16 mt-2 rounded-sm mr-2 flex items-center justify-between shadow-sm">
@@ -136,7 +136,6 @@ export function WorkflowNavbar({
           </span>
         </div>
 
-        {/* Only show Add Action in view mode or if not in view mode */}
         <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>
             <Button className="bg-white text-black cursor-pointer border-1 border-b-3 hover:bg-teal-100 border-neutral-700">
@@ -175,11 +174,20 @@ export function WorkflowNavbar({
             )}
           </DialogContent>
         </Dialog>
+
         <Button
           className="bg-teal-500 hover:bg-teal-600 text-white px-3 sm:px-4 py-2 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleExecution}
+          disabled={isExecuting}
         >
-          Run
+          {isExecuting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Running...
+            </>
+          ) : (
+            "Run"
+          )}
         </Button>
 
         <Button

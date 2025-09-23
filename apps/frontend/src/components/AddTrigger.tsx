@@ -46,6 +46,7 @@ export function AddTrigger() {
   };
 
   const triggers = useWorkflowStore((state) => state.triggers);
+  
   const addTriggerNode = useWorkflowStore((state) => state.addTriggerNode);
   const handleTriggerSelect = (trigger: TriggerI) => {
     addTriggerNode(trigger);

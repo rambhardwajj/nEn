@@ -1,17 +1,18 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
-import { 
-  addEdge, 
-  applyNodeChanges, 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import {
+  addEdge,
+  applyNodeChanges,
   applyEdgeChanges,
-  type Node, 
+  type Node,
   type Edge,
   type OnNodesChange,
   type OnEdgesChange,
-  type OnConnect
+  type OnConnect,
 } from "@xyflow/react";
 import type { UserCredentials } from "@repo/db";
-import axios from 'axios';
+import axios from "axios";
 
 export interface TriggerI {
   id: string;
@@ -19,50 +20,71 @@ export interface TriggerI {
   type: string;
   description?: string;
 }
+export interface WorkflowEvent {
+  executionId: string;
+  workflow: string;
+  nodeId: string;
+  timeStamp: Date;
+  status: "started" | "completed" | "failed";
+  data?: any;
+}
 
 export interface WorkflowState {
   // Core workflow data
   nodes: Node[];
   edges: Edge[];
   workflowId?: string; // Add workflow ID for tracking
-  
+
   // UI state
   isWorkflowActive: boolean;
   projectName: string;
-  
+
   // Data
   triggers: TriggerI[];
   userCredentials: UserCredentials[];
-  
+
   // Loading states
   isLoading: boolean;
   isSaving: boolean;
-  
+
   // Actions for nodes and edges
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
-  
-  // Actions for workflow management 
+
+
+  // Actions for workflow management
   setIsWorkflowActive: (active: boolean) => void;
   setProjectName: (name: string) => void;
   resetWorkflow: () => void; // Reset to initial state
-  
+
+  updateNodeData : (id: string, data: any ) => void;
+
   // Actions for triggers
   setTriggers: (triggers: TriggerI[]) => void;
   addTriggerNode: (trigger: TriggerI) => void;
-  
+
   // Actions for credentials
   setUserCredentials: (credentials: UserCredentials[]) => void;
-  
+
   // Async actions
   saveWorkflow: (workflowId?: string) => Promise<string | null>; // Return workflow ID
   loadWorkflow: (workflowId: string) => Promise<void>; // Load specific workflow
   loadTriggers: () => Promise<void>;
   loadUserCredentials: () => Promise<void>;
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   addActionNode: (actionData: any) => void;
+  
+
+  ws: WebSocket | null;
+  currExecutionId: string | null;
+  nodeStatuses: Map<string, "running" | "idle" | "completed" | "failed">;
+  isExecuting: boolean;
+  executionEvents: WorkflowEvent[];
+
+  connectWebSocket: (executionId: string) => void;
+  disconnectWebSocket: () => void;
+  executeWorkflowWithWebSocket: () => Promise<string | null>;
 }
 
 const initialNodes: Node[] = [
@@ -106,17 +128,18 @@ export const useWorkflowStore = create<WorkflowState>()(
       // Node and edge handlers
       onNodesChange: (changes) => {
         set((state) => ({
-          nodes: applyNodeChanges(changes, state.nodes)
+          nodes: applyNodeChanges(changes, state.nodes),
         }));
       },
+
       onEdgesChange: (changes) => {
         set((state) => ({
-          edges: applyEdgeChanges(changes, state.edges)
+          edges: applyEdgeChanges(changes, state.edges),
         }));
       },
       onConnect: (connection) => {
         set((state) => ({
-          edges: addEdge(connection, state.edges)
+          edges: addEdge(connection, state.edges),
         }));
       },
 
@@ -138,7 +161,7 @@ export const useWorkflowStore = create<WorkflowState>()(
 
       setTriggers: (triggers) => {
         set({ triggers });
-        
+
         set((state) => ({
           nodes: state.nodes.map((node) =>
             node.id === "1"
@@ -151,12 +174,12 @@ export const useWorkflowStore = create<WorkflowState>()(
                   },
                 }
               : node
-          )
+          ),
         }));
       },
       addTriggerNode: (trigger) => {
         const { nodes } = get();
-        
+
         const newNode: Node = {
           id: `trigger-${nodes.length}`,
           type: getNodeType(trigger.type),
@@ -168,10 +191,10 @@ export const useWorkflowStore = create<WorkflowState>()(
             triggerId: trigger.id,
           },
         };
-        
-        const newNodes = nodes.filter((node) => node.id !== "1")
+
+        const newNodes = nodes.filter((node) => node.id !== "1");
         set(() => ({
-          nodes: [...newNodes, newNode]
+          nodes: [...newNodes, newNode],
         }));
       },
 
@@ -180,13 +203,23 @@ export const useWorkflowStore = create<WorkflowState>()(
         set({ userCredentials: credentials });
       },
 
+      updateNodeData : (nodeId: string, newData: any) =>{
+        set((state) => {
+          return {
+            nodes: state.nodes.map(node => 
+              node.id === nodeId ? { ...node , data:{...node.data , ...newData } } : node
+            )
+          }
+        })
+      },
+
       // Action node management
       addActionNode: (actionData) => {
         const { nodes } = get();
-        
+
         const newNode: Node = {
           id: `action-${nodes.length}`,
-          type: "action", 
+          type: "action",
           position: { x: 0 + nodes.length * 150, y: 200 },
           data: {
             label: actionData.name || "Action",
@@ -199,15 +232,15 @@ export const useWorkflowStore = create<WorkflowState>()(
         };
 
         set((state) => ({
-          nodes: [...state.nodes, newNode]
+          nodes: [...state.nodes, newNode],
         }));
       },
 
       saveWorkflow: async (workflowId?: string) => {
         const { nodes, edges, projectName, isWorkflowActive } = get();
-        
+
         set({ isSaving: true });
-        
+
         try {
           const workflow = {
             nodes,
@@ -218,26 +251,27 @@ export const useWorkflowStore = create<WorkflowState>()(
 
           let res;
           if (workflowId) {
-            console.log("in update ")
+            console.log("in update ");
             res = await axios.put(
               `http://localhost:8888/api/v1/workflow/${workflowId}`,
               workflow,
               { withCredentials: true }
             );
           } else {
-            console.log("in create")
+            console.log("in create");
             res = await axios.post(
               "http://localhost:8888/api/v1/workflow/save",
               workflow,
               { withCredentials: true }
             );
 
-            console.log(res)
+            console.log(res);
           }
 
           if (res && res.data) {
-            const savedWorkflowId = res.data.workflowId || res.data.data?.workflowId;
-            console.log(savedWorkflowId)
+            const savedWorkflowId =
+              res.data.workflowId || res.data.data?.workflowId;
+            console.log(savedWorkflowId);
             set({ workflowId: savedWorkflowId });
             alert("Workflow saved successfully!");
             return savedWorkflowId;
@@ -254,13 +288,13 @@ export const useWorkflowStore = create<WorkflowState>()(
 
       loadWorkflow: async (workflowId: string) => {
         set({ isLoading: true });
-        
+
         try {
           const res = await axios.get(
             `http://localhost:8888/api/v1/workflow/${workflowId}`,
             { withCredentials: true }
           );
-          
+
           if (res.data && res.data.data) {
             const workflow = res.data.data;
             set({
@@ -281,13 +315,13 @@ export const useWorkflowStore = create<WorkflowState>()(
 
       loadTriggers: async () => {
         set({ isLoading: true });
-        
+
         try {
           const res = await axios.get(
             "http://localhost:8888/api/v1/trigger/all",
             { withCredentials: true }
           );
-          
+
           get().setTriggers(res.data.data);
         } catch (error) {
           console.error("Failed to load triggers:", error);
@@ -295,22 +329,134 @@ export const useWorkflowStore = create<WorkflowState>()(
           set({ isLoading: false });
         }
       },
-
       loadUserCredentials: async () => {
         try {
-          const res = await axios.get(
-            'http://localhost:8888/api/v1/cred/all',
-            { withCredentials: true }
-          );
-          
+          const res = await axios.get("http://localhost:8888/api/v1/cred/all", {
+            withCredentials: true,
+          });
+
           get().setUserCredentials(res.data.data);
         } catch (error) {
           console.error("Failed to load user credentials:", error);
         }
       },
+
+      // execution workflow
+      ws: null,
+      currExecutionId: null,
+      nodeStatuses: new Map(),
+      isExecuting: false,
+      executionEvents: [],
+
+      connectWebSocket: (executionId: string) => {
+        const { ws } = get();
+        if (ws) {
+          ws.close();
+        }
+
+        try {
+          const websocket = new WebSocket(
+            `ws://localhost:8080/${executionId}`
+          );
+
+          websocket.onopen = () => {
+            console.log("socket opened for execution id ", executionId);
+            set({ ws: websocket, currExecutionId: executionId });
+          };
+
+          websocket.onmessage = (event) => {
+            // jese hi fe pe data aaega from ws i will extract the status from the web event
+            // const workflowEvent: WorkflowEvent = JSON.parse(event.data);
+            const workflowEvent: WorkflowEvent = JSON.parse(event.data);
+
+            set((state) => {
+              const newNodeStatus = new Map(state.nodeStatuses);
+
+              switch (workflowEvent.status) {
+                case "started":
+                  newNodeStatus.set(workflowEvent.nodeId, "running");
+                  break;
+                case "completed":
+                  newNodeStatus.set(workflowEvent.nodeId, "completed");
+                  break;
+                case "failed":
+                  newNodeStatus.set(workflowEvent.nodeId, "failed");
+              }
+
+              const stillRunning = Array.from(newNodeStatus.values()).some(
+                (status) => status === "running"
+              );
+
+              return {
+                nodeStatuses: newNodeStatus,
+                isExecuting: stillRunning,
+                executionEvents: [...state.executionEvents, workflowEvent],
+              };
+            });
+          };
+
+          websocket.onclose = () => {
+            set({ ws: null, currExecutionId: null });
+          };
+
+          websocket.onerror = (error) => {
+            console.log("WebSocket Error ", error);
+            set({ isExecuting: false });
+          };
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      disconnectWebSocket: () => {
+        const { ws } = get();
+        if (ws) {
+          ws.close();
+          set({
+            ws: null,
+            currExecutionId: null,
+            nodeStatuses: new Map(),
+            isExecuting: false,
+          });
+        }
+      },
+      executeWorkflowWithWebSocket: async () => {
+        const { nodes, workflowId } = get();
+        if (!workflowId) throw new Error("No workflow Id available");
+
+        try {
+          const nodeStatuses = new Map();
+          nodes.forEach((node) => {
+            return nodeStatuses.set(node.id, "idle");
+          });
+
+          set({
+            isExecuting: true,
+            nodeStatuses,
+            executionEvents: [],
+          });
+
+          const res = await axios.post(
+            `http://localhost:8888/api/v1/workflow/execute/${workflowId}`,
+            {},
+            { withCredentials: true }
+          );
+
+          if (res.status === 200) {
+            const { executionId } = res.data.data;
+
+            get().connectWebSocket(executionId);
+            return executionId;
+          }
+        } catch (error) {
+          console.error('Error executing workflow:', error);
+          set({ isExecuting: false });
+         
+            get().disconnectWebSocket();
+        }
+      },
     }),
     {
-      name: 'workflow-store', 
+      name: "workflow-store",
     }
   )
 );

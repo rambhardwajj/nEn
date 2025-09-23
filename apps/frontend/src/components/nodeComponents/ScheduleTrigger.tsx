@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Handle, Position } from "@xyflow/react";
 import { Clock } from "lucide-react";
 
 export function ScheduledTriggerNode({ data }: { data: any }) {
+  console.log("Schedule data", data)
   return (
     <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg shadow-lg border-2 border-purple-400 w-24 sm:w-36 md:w-40 lg:w-30">
       <div className="px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3">

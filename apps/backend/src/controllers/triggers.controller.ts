@@ -1,8 +1,9 @@
-import z from "zod";
 import asyncHandler from "../utils/asyncHandler";
 import { ApiResponse } from "../utils/ApiResponse";
 import { prisma } from "@repo/db";
 import { CustomError } from "../utils/CustomError";
+
+const wbId = new Set();
 
 export const getAllTriggers = asyncHandler(async (req, res) => {
   const userId = req.user.id;
@@ -48,3 +49,4 @@ export const createTrigger = asyncHandler(async (req, res) => {
 
   res.status(200).json(new ApiResponse(200, "new trigger created", newTrigger));
 });
+

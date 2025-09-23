@@ -159,9 +159,9 @@ export function CredentialDialogContent({
                 <div className="w-[80%] py-2 ml-1 flex flex-col justify-between items-center text-xs">
                   <div className="bg-teal-100 py-2 px-2 w-full border-l-4 rounded-sm">
                     <div>
-                      Need Help? See{" "}
+                      Need help... See{" "}
                       <a
-                        className="text-blue-600 font-bold"
+                        className="text-teal-600 font-bold"
                         target="_blank"
                         href={currCredApi?.documentationUrl}
                       >
