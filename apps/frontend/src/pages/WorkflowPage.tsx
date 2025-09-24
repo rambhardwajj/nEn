@@ -20,7 +20,6 @@ import { useWorkflowStore } from "@/store/workflowStore";
 import { Loader2 } from "lucide-react";
 import { ActionNode } from "@/components/nodeComponents/ActionNode";
 
-
 // ye  Node configuration
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
@@ -71,24 +70,30 @@ const WorkflowPage = () => {
       case "running":
         style = {
           ...style,
-          backgroundColor: "#FFA500",
+          borderColor: "#FFA500",
           border: "2px solid #FF8C00",
+          borderRadius: "10px",
+
           boxShadow: "0 0 10px rgba(255, 165, 0, 0.5)",
         };
         break;
       case "completed":
         style = {
           ...style,
-          backgroundColor: "#4CAF50",
-          border: "2px solid #45a049",
+          padding: "10px",
+          backgroundColor: "#3CB371",
+          borderRadius: "10px",
+          // border: "2px solid #45a049",
           color: "white",
         };
         break;
       case "failed":
         style = {
           ...style,
+          borderRadius: "10px",
+
           backgroundColor: "#F44336",
-          border: "2px solid #da190b",
+          // border: "2px solid #da190b",
           color: "white",
         };
         break;
@@ -96,7 +101,7 @@ const WorkflowPage = () => {
         style = {
           ...style,
           backgroundColor: "#FFFFFF",
-          border: "1px solid #ddd",
+          // border: "1px solid #ddd",
         };
     }
 
