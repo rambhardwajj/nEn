@@ -48,24 +48,23 @@ export interface WorkflowState {
   isSaving: boolean;
 
   // Actions for nodes and edges
-  onNodesChange: OnNodesChange;
-  onEdgesChange: OnEdgesChange;
-  onConnect: OnConnect;
-
+  onNodesChange: OnNodesChange; // manages the nodes state changes
+  onEdgesChange: OnEdgesChange; // manages the edges state changes
+  onConnect: OnConnect; // manages the connections of one node to another
 
   // Actions for workflow management
-  setIsWorkflowActive: (active: boolean) => void;
-  setProjectName: (name: string) => void;
-  resetWorkflow: () => void; // Reset to initial state
+  setIsWorkflowActive: (active: boolean) => void; // not using abhi ke liye likin for webhook and pinging 
+  setProjectName: (name: string) => void; // not using abhi will use baad mai 
+  resetWorkflow: () => void; // reset to initial state, will use this later as well 
 
-  updateNodeData : (id: string, data: any ) => void;
+  updateNodeData : (id: string, data: any ) => void; // nodes mai new data ko append krdeta hai - spread and override the existisng vals 
 
   // Actions for triggers
-  setTriggers: (triggers: TriggerI[]) => void;
-  addTriggerNode: (trigger: TriggerI) => void;
+  setTriggers: (triggers: TriggerI[]) => void; // this is used for sheets mai triggers dikhane ke liye AND ek addtrigger node bhi dalne ke liye
+  addTriggerNode: (trigger: TriggerI) => void; // this is used for adding the new seleced trigger node from the sheet AND romoving the ADD Trigger node from canvas 
 
   // Actions for credentials
-  setUserCredentials: (credentials: UserCredentials[]) => void;
+  setUserCredentials: (credentials: UserCredentials[]) => void; // sets the user credentials jo api se mangwae the 
 
   // Async actions
   saveWorkflow: (workflowId?: string) => Promise<string | null>; // Return workflow ID
@@ -177,6 +176,7 @@ export const useWorkflowStore = create<WorkflowState>()(
           ),
         }));
       },
+
       addTriggerNode: (trigger) => {
         const { nodes } = get();
 
@@ -329,6 +329,7 @@ export const useWorkflowStore = create<WorkflowState>()(
           set({ isLoading: false });
         }
       },
+      
       loadUserCredentials: async () => {
         try {
           const res = await axios.get("http://localhost:8888/api/v1/cred/all", {
@@ -370,7 +371,7 @@ export const useWorkflowStore = create<WorkflowState>()(
             const workflowEvent: WorkflowEvent = JSON.parse(event.data);
 
             set((state) => {
-              const newNodeStatus = new Map(state.nodeStatuses);
+              const newNodeStatus = new Map(state.nodeStatuses); // nodeId -> status 
 
               switch (workflowEvent.status) {
                 case "started":

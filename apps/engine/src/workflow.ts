@@ -112,6 +112,16 @@ export class Workflow {
       return;
     }
 
+    if( this.detectCycle()){
+      this.eventPublisher.publish("workflow.event", {
+      executionId: this.executionData.executionId,
+      workflow: this.executionData.workflow.id,
+      nodeId: node.id,
+      timeStamp: new Date(Date.now()),
+      status: "started",
+    });
+    }
+
     console.log(`Executing node ${node.id} of type ${node.type}`);
 
     this.eventPublisher.publish("workflow.event", {
@@ -124,6 +134,8 @@ export class Workflow {
 
     try {
       let output: any = null;
+
+    
 
       // handling diff node types
       if (node.type === "webhookTrigger") {
