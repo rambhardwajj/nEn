@@ -67,12 +67,12 @@ export interface WorkflowState {
   setUserCredentials: (credentials: UserCredentials[]) => void; // sets the user credentials jo api se mangwae the 
 
   // Async actions
-  saveWorkflow: (workflowId?: string) => Promise<string | null>; // Return workflow ID
+  saveWorkflow: (workflowId?: string) => Promise<string | null>; // Return workflow ID and save the workflow or update the workflow 
   loadWorkflow: (workflowId: string) => Promise<void>; // Load specific workflow
-  loadTriggers: () => Promise<void>;
-  loadUserCredentials: () => Promise<void>;
+  loadTriggers: () => Promise<void>; // load the triggers from the apis 
+  loadUserCredentials: () => Promise<void>; // loading the user credentials 
 
-  addActionNode: (actionData: any) => void;
+  addActionNode: (actionData: any) => void; // add Action Node with action id 
   
 
   ws: WebSocket | null;
@@ -329,7 +329,7 @@ export const useWorkflowStore = create<WorkflowState>()(
           set({ isLoading: false });
         }
       },
-      
+
       loadUserCredentials: async () => {
         try {
           const res = await axios.get("http://localhost:8888/api/v1/cred/all", {
@@ -425,17 +425,20 @@ export const useWorkflowStore = create<WorkflowState>()(
         if (!workflowId) throw new Error("No workflow Id available");
 
         try {
+          // starting mai sabka status idle daal do 
           const nodeStatuses = new Map();
           nodes.forEach((node) => {
             return nodeStatuses.set(node.id, "idle");
           });
 
+          // isExecuting state truee krdo for loading show kr ne ke liye 
           set({
             isExecuting: true,
             nodeStatuses,
             executionEvents: [],
           });
 
+          // hit the be endpoint isme => workflowId se workflow nikal ke be will send to engine and engine will execute the thing 
           const res = await axios.post(
             `http://localhost:8888/api/v1/workflow/execute/${workflowId}`,
             {},
@@ -445,7 +448,7 @@ export const useWorkflowStore = create<WorkflowState>()(
           if (res.status === 200) {
             const { executionId } = res.data.data;
 
-            get().connectWebSocket(executionId);
+            get().connectWebSocket(executionId); // abh ws connnect krlo kyuki be ka wss is started and wo message send krega to fe with event info 
             return executionId;
           }
         } catch (error) {
