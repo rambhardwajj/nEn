@@ -6,12 +6,13 @@ import { returnSaveCred } from "../utils/handleSaveCred";
 import { prisma } from "@repo/db";
 import z from "zod";
 import { CustomError } from "../utils/CustomError";
+import { google } from "googleapis";
 
 const createCredentialsSchema = z.object({
   name: z.string(),
   type: z.string().optional(),
   appIcon: z.string().optional(),
-  application : z.string().optional(),
+  application: z.string().optional(),
   apiName: z.string().optional(),
   data: z.object({
     accessToken: z.string().optional(),
@@ -85,8 +86,8 @@ export const updateCredential = asyncHandler(async (req, res) => {
   // console.log(req.body)
   const credData = updateCredentialsSchema.safeParse(req.body);
   const { credId } = req.params;
-  if(credData.error){
-    throw new CustomError(403, "updated cred failed due to input validation")
+  if (credData.error) {
+    throw new CustomError(403, "updated cred failed due to input validation");
   }
 
   const existingCred = await prisma.userCredentials.findFirst({
@@ -98,31 +99,43 @@ export const updateCredential = asyncHandler(async (req, res) => {
   if (!existingCred)
     throw new CustomError(401, "Credentials does not belogns to you");
 
-   const updatedCred = await prisma.userCredentials.update({
+  const updatedCred = await prisma.userCredentials.update({
     where: { id: credId },
     data: {
       name: existingCred.name,
       type: existingCred.type,
-      appIcon:  existingCred.appIcon,
-      apiName:  existingCred.apiName,
-      data: credData.data && credData.data.data
-        ? { ...(existingCred.data as any), ...credData.data.data }
-        : existingCred.data,
+      appIcon: existingCred.appIcon,
+      apiName: existingCred.apiName,
+      data:
+        credData.data && credData.data.data
+          ? { ...(existingCred.data as any), ...credData.data.data }
+          : existingCred.data,
       updatedAt: new Date(),
     },
   });
-  res.status(200).json(new ApiResponse(200, "updated successfuly ", updatedCred))
+  res
+    .status(200)
+    .json(new ApiResponse(200, "updated successfuly ", updatedCred));
 });
 
-export const getAllCredentials = asyncHandler(async ( req, res) =>{
+export const getAllCredentials = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  if( !userId) throw new CustomError(404, "User id is invalid")
+  if (!userId) throw new CustomError(404, "User id is invalid");
 
   const allUserCred = await prisma.userCredentials.findMany({
     where: {
-      userId : userId
-    }
-  })
+      userId: userId,
+    },
+  });
 
-  res.status(200).json(new ApiResponse(200, "Retrieved all the credentionls for the user",allUserCred ))
-})
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        "Retrieved all the credentionls for the user",
+        allUserCred
+      )
+    );
+});
+

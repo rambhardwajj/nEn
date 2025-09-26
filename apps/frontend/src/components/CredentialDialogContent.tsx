@@ -41,12 +41,12 @@ export function CredentialDialogContent({
     if (currCredApi) {
       const initialValues: Record<string, string> = {};
       currCredApi.properties.forEach((prop) => {
-        initialValues[prop.name] = prop.default ?? ""; 
+        initialValues[prop.name] = prop.default ?? "";
       });
       setFormValues(initialValues);
     }
   }, [currCredApi]);
-  
+
   const handleChange = (field: string, value: string) => {
     setFormValues((prev) => ({
       ...prev,
@@ -74,8 +74,7 @@ export function CredentialDialogContent({
         { withCredentials: true }
       );
       console.log("saved", res.data);
-      if(res)
-        alert("Credentials created successfully")
+      if (res) alert("Credentials created successfully");
     } catch (error) {
       console.error("Error saving credential:", error);
     }
@@ -92,7 +91,7 @@ export function CredentialDialogContent({
               if (selected) {
                 setCredName(value);
                 setCredCurrApi(selected);
-                setFormValues({}); 
+                setFormValues({});
               }
             }}
           >
@@ -143,6 +142,7 @@ export function CredentialDialogContent({
                     </DialogDescription>
                   </div>
                 </div>
+
                 <div>
                   <Button className="mr-10 bg-teal-500" onClick={handleSave}>
                     Save
@@ -169,6 +169,18 @@ export function CredentialDialogContent({
                       </a>
                     </div>
                   </div>
+                  {currCredApi?.name === "gmailOAuth2" && (
+                    <div className="my-2">
+                      <Button
+                        onClick={() => {
+                          window.location.href =
+                            "http://localhost:8888/api/v1/auth/google";
+                        }}
+                      >
+                        Sign in with Google
+                      </Button>
+                    </div>
+                  )}
                   <div className="py-2 px-2 w-full rounded-sm">
                     {currCredApi?.properties.map((curr) => (
                       <div key={curr.name} className="my-1">

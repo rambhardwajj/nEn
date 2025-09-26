@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import ms, { type StringValue } from "ms";
 import bcrypt from "bcryptjs";
 import { generateCookieOptions } from "../config/cookie";
+import { google } from "googleapis";
 
 export const createHash = (token: string) =>
   crypto.createHash("sha256").update(token).digest("hex");
@@ -140,4 +141,56 @@ export const getUser: RequestHandler = asyncHandler(
     }
   }
 );
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  "http://localhost:8888/api/v1/auth/google/callback"
+);
+const SCOPES = [
+  "https://www.googleapis.com/auth/gmail.readonly",
+  "https://mail.google.com/",
+  "https://www.googleapis.com/auth/userinfo.email",
+];
 
+
+export const signInWithGoogle = asyncHandler(async (req, res) => {
+  const url = oauth2Client.generateAuthUrl({
+    access_type: "offline", // important for refresh_token
+    scope: SCOPES,
+    prompt: "consent", // ensures refresh_token each time
+  });
+  res.redirect(url);
+});
+
+export const handleSignInCallback = asyncHandler(async (req, res) => {
+  const code = req.query.code as string;
+
+  const { tokens } = await oauth2Client.getToken(code);
+
+  // tokens = { access_token, refresh_token, expiry_date, id_token }
+  // Save refresh_token securely
+  const userId = req.user.id;
+
+  // Save credentials in DB
+  const createdCred = await prisma.userCredentials.create({
+    data: {
+      name: "Google Account",
+      apiName: "gmailOAuth2",
+      appIcon: "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r2.png", 
+      application: "google",
+      userId: userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      data: {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expiry_date: tokens.expiry_date,
+        id_token: tokens.id_token,
+      },
+    },
+  });
+
+  console.log(tokens);
+
+  res.status(200).json(new ApiResponse(200, "Google account connected", createdCred))
+});
