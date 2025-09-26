@@ -192,5 +192,6 @@ export const handleSignInCallback = asyncHandler(async (req, res) => {
 
   console.log(tokens);
 
-  res.status(200).json(new ApiResponse(200, "Google account connected", createdCred))
+  // res.status(200).json(new ApiResponse(200, "Google account connected", createdCred))
+  res.redirect("http://localhost:5173/");
 });

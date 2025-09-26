@@ -179,7 +179,7 @@ export const DashboardTabs = () => {
                             Object.entries(selectedCred.data).map(
                               ([key, value]) => (
                                 <div key={key}>
-                                  <label className="text-sm text-teal-700 capitalize">
+                                  <label className="text-sm text-teal-700 truncate capitalize">
                                     {key}
                                   </label>
                                   {isEditing ? (
@@ -192,7 +192,7 @@ export const DashboardTabs = () => {
                                       }
                                     />
                                   ) : (
-                                    <p>{String(value)}</p>
+                                    <p className=" max-w-[400px] truncate ">{String(value)}</p>
                                   )}
                                 </div>
                               )
