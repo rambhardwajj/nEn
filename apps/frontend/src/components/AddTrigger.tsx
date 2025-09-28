@@ -107,7 +107,7 @@ export function AddTrigger() {
 
                   <div className="mt-1 pt-1 border-t border-transparent group-hover:border-teal-200 transition-all duration-200">
                     <span className="text-xs text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      Click to add this trigger →
+                      Click to add this trigger 
                     </span>
                   </div>
                 </div>
@@ -118,7 +118,7 @@ export function AddTrigger() {
                   No triggers available
                 </p>
                 <p className="text-sm text-gray-400 mt-1">
-                  Triggers will appear here when they're loaded
+                  Triggers will appear here when loaded
                 </p>
               </div>
             )}

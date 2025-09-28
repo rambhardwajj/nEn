@@ -168,7 +168,7 @@ export const handleSignInCallback = asyncHandler(async (req, res) => {
   const { tokens } = await oauth2Client.getToken(code);
 
   // tokens = { access_token, refresh_token, expiry_date, id_token }
-  // Save refresh_token securely
+  // save refresh_token with sec
   const userId = req.user.id;
 
   // Save credentials in DB
@@ -192,6 +192,6 @@ export const handleSignInCallback = asyncHandler(async (req, res) => {
 
   console.log(tokens);
 
-  // res.status(200).json(new ApiResponse(200, "Google account connected", createdCred))
   res.redirect("http://localhost:5173/");
+  res.status(200).json(new ApiResponse(200, "Google account connected", createdCred))
 });
