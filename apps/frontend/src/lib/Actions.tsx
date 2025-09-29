@@ -51,15 +51,6 @@ export const availableActions: ActionI[] = [
     icon: <Database className="w-5 h-5" />,
     category: "Data",
   },
-  // {
-  //   id: "gmail",
-  //   name: "Send an Email",
-  //   type: "GmailNodeType",
-  //   application: "Gmail",
-  //   description: "Send an email",
-  //   icon: <Mail className="w-5 h-5" />,
-  //   category: "Communication",
-  // },
   {
     id: "webhook-call",
     name: "Call Webhook",

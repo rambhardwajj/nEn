@@ -133,7 +133,7 @@ const WorkflowPage = () => {
   }
 
   return (
-    <div className="h-[100vh] w-[100vw] relative">
+    <div className="h-[90vh] w-[100vw] relative">
       {isExecuting && (
         <div className="absolute top-20 right-4 z-50 bg-orange-100 border border-orange-300 rounded-lg p-3 shadow-lg">
           <div className="flex items-center gap-2">

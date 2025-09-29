@@ -54,6 +54,7 @@ export class Workflow {
 
     return processed.length !== this.nodes.size;
   }
+
   getExecutionOrder(): string[] {
     const tempInDegree = new Map(this.inDegree);
 
@@ -79,6 +80,7 @@ export class Workflow {
     }
     return order;
   }
+
   private async loadCredentials(): Promise<void> {
     try {
       console.log("Loading credentials for user:", this.executionData.userId);
@@ -179,6 +181,10 @@ export class Workflow {
 
         // store the output for subsequent nodes
         this.nodeOutputs.set(nodeId, output);
+        
+        console.log()
+        console.log("NODE OUTPUTS ==>",this.nodeOutputs)
+        console.log()
 
         console.log(`Action ${node.data.actionType} completed:`, output);
       } else {
