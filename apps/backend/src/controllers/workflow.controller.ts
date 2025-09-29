@@ -250,3 +250,23 @@ export const executeFlow = asyncHandler(async (req, res) => {
     throw new CustomError(500, "Failed to queue workflow for execution");
   }
 });
+
+export const deleteWorkflow = asyncHandler(async(req, res ) =>{
+  const userId = req.user.id;
+  const {workflowId} = req.params
+  if( !userId) throw new CustomError(404, "userid not found")
+    let delWf;
+    try {
+       delWf = await prisma.workflow.delete({
+        where:{
+          id: workflowId
+        }
+      })
+
+    } catch (error) {
+      throw new CustomError(400, "failed to delete the workflow")
+    }
+
+    res.status(200).json(new ApiResponse(200, "Workflow deleted successfully", delWf))
+})
+

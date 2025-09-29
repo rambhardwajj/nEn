@@ -4,7 +4,8 @@ import {
   getWorkflowById, 
   updateWorkflow, 
   getUserWorkflows, 
-  executeFlow
+  executeFlow,
+  deleteWorkflow
 } from "../controllers/workflow.controller";
 import { isLoggedIn } from "../middlewares/auth.middleware";
 
@@ -15,5 +16,6 @@ router.get('/:workflowId', isLoggedIn, getWorkflowById);
 router.put('/:workflowId', isLoggedIn, updateWorkflow);
 router.get('/', isLoggedIn, getUserWorkflows);
 router.post('/execute/:workflowId', isLoggedIn, executeFlow)
-
+router.post('/getAllWorkflows', isLoggedIn, getUserWorkflows)
+router.delete('/:workflowId', isLoggedIn, deleteWorkflow)
 export default router;
