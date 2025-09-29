@@ -28,6 +28,9 @@ export const actionSchemas: Record<string, any> = {
       }
     ]
   },
+  GmailTrigger:{
+    fields:[]
+  },
   
   OpenAi: {
     fields: [
@@ -58,31 +61,31 @@ export const actionSchemas: Record<string, any> = {
     ]
   },
 
-  Gmail: {
-    fields: [
-      {
-        name: "to",
-        label: "To Email",
-        type: "text",
-        required: true,
-        placeholder: "recipient@example.com"
-      },
-      {
-        name: "subject",
-        label: "Subject",
-        type: "text",
-        required: true,
-        placeholder: "Email subject"
-      },
-      {
-        name: "body",
-        label: "Message Body",
-        type: "textarea",
-        required: true,
-        placeholder: "Email content..."
-      }
-    ]
-  },
+  // Gmail: {
+  //   fields: [
+  //     {
+  //       name: "to",
+  //       label: "To Email",
+  //       type: "text",
+  //       required: true,
+  //       placeholder: "recipient@example.com"
+  //     },
+  //     {
+  //       name: "subject",
+  //       label: "Subject",
+  //       type: "text",
+  //       required: true,
+  //       placeholder: "Email subject"
+  //     },
+  //     {
+  //       name: "body",
+  //       label: "Message Body",
+  //       type: "textarea",
+  //       required: true,
+  //       placeholder: "Email content..."
+  //     }
+  //   ]
+  // },
 
   WebHookNodeType: {
     fields: [

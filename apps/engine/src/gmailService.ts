@@ -18,34 +18,7 @@ class GmailMonitor {
     }
   > = new Map();
 
-  async startExecutionMonitoring(config: {
-    executionId: string;
-    userId: string;
-    accessToken: string;
-    email: string;
-    filters: any;
-    onEmailReceived: (emailData: any) => void;
-    onError: (error: any) => void;
-  }) {
-    console.log(`Starting execution monitoring for: ${config.executionId}`);
 
-    // Store the waiter
-    this.executionWaiters.set(config.executionId, {
-      executionId: config.executionId,
-      filters: config.filters,
-      onEmailReceived: config.onEmailReceived,
-      onError: config.onError,
-    });
-
-    // Start IMAP connection if not already running for this user
-    if (!this.connections.has(config.userId)) {
-      await this.startMonitoring(
-        config.userId,
-        config.accessToken,
-        config.email
-      );
-    }
-  }
 
   // start the monitoring job - create hte imap obj add user and token to the obj
   // when imap i sat ready start monitoring the inbox

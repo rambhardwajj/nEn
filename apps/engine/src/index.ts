@@ -20,6 +20,9 @@ const main = async () => {
   
   const exectionData = JSON.parse(res.value);
   console.log("ExecutionDATA====>>>", exectionData);
+  console.log("Nodes===> ",exectionData.workflow.nodes)
+  console.log("EDGES===> ",exectionData.workflow.edges)
+
   const workflowObj = new Workflow(exectionData);
 
   workflowObj.buildGraph();

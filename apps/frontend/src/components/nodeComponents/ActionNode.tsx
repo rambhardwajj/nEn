@@ -15,12 +15,14 @@ const getActionIcon = (actionType: string) => {
   switch (actionType) {
     case "TelegramNodeType":
       return <Send className="w-6 h-6 text-white" />;
-    case "GmailNodeType":
-      return <Mail className="w-6 h-6 text-white" />;
+    // case "GmailNodeType":
+    //   return <Mail className="w-6 h-6 text-white" />;
     case "openAiNodeType":
       return <Database className="w-6 h-6 text-white" />;
     case "WebHookNodeType":
       return <Webhook className="w-6 h-6 text-white" />;
+    case "EmailNodeType":
+      return <Mail className="w-6 h-6 text-white" />;
     default:
       return <Settings className="w-6 h-6 text-white" />;
   }
@@ -30,12 +32,14 @@ const getActionColor = (actionType: string) => {
   switch (actionType) {
     case "TelegramNodeType":
       return "bg-cyan-600/70";
-    case "GmailNodeType":
-      return "bg-red-600";
+    // case "GmailNodeType":
+    //   return "bg-red-600";
     case "openAiNodeType":
       return "bg-green-600";
     case "WebHookNodeType":
       return "bg-purple-600";
+    case "EmailTriggerType":
+      return "bg-orange-600"
     default:
       return "bg-gray-600";
   }
@@ -45,12 +49,14 @@ const getActionDisplayName = (actionType: string) => {
   switch (actionType) {
     case "TelegramNodeType":
       return "Telegram";
-    case "GmailNodeType":
-      return "Gmail";
+    // case "GmailNodeType":
+    //   return "Gmail";
     case "openAiNodeType":
       return "OpenAI";
     case "WebHookNodeType":
       return "Webhook";
+    case "EmailTriggerType":
+      return "gmailOAuth2"
     default:
       return "Action";
   }

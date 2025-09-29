@@ -135,8 +135,6 @@ export class Workflow {
     try {
       let output: any = null;
 
-    
-
       // handling diff node types
       if (node.type === "webhookTrigger") {
         const triggerData = (this.executionData as any).triggerData;
