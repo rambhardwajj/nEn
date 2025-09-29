@@ -113,6 +113,7 @@ private async executeEmailTriggerAction(
 
     const timeout = setTimeout(() => {
       if (!emailReceived) {
+        console.log("No email received")
         imap.end();
         resolve({
           success: false,

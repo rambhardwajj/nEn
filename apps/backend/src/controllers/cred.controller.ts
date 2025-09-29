@@ -139,3 +139,19 @@ export const getAllCredentials = asyncHandler(async (req, res) => {
     );
 });
 
+export const deleteCredentials = asyncHandler(async(req , res) =>{
+  const userId = req.user.id;
+  const {credId} = req.params;
+  let deletedCred ;
+  try { 
+    deletedCred = await prisma.userCredentials.delete({
+      where:{
+        id: credId
+      }
+    })
+    
+  } catch (error) {
+    throw new CustomError(400, "failed to delete the cred")
+  }
+  res.status(200).json(new ApiResponse(200, "deleted the cred", deletedCred))
+})

@@ -217,11 +217,41 @@ export const DashboardTabs = () => {
                         onClick={() => setSelectedCred(cred)}
                         className="shadow-sm cursor-pointer py-4 px-0 hover:shadow-md transition rounded-lg gap-2 border border-gray-200"
                       >
-                        <CardHeader className="flex flex-row items-center px-3 gap-2">
-                          <img src={cred.appIcon} width={30} alt="" />
-                          <CardTitle className="text-base">
-                            {cred.name}
-                          </CardTitle>
+                        <CardHeader className="flex flex-row justify-between items-center px-3 gap-2">
+                          <div className="flex flex-row items-center gap-2">
+                            <img src={cred.appIcon} width={30} alt="" />
+                            <CardTitle className="text-base">
+                              {cred.name}
+                            </CardTitle>
+                          </div>
+                          <Trash
+                            className="text-red-800 cursor-pointer transition-transform duration-200 hover:scale-110"
+                            width={20}
+                            onClick={async (e) => {
+                              e.stopPropagation(); // prevent card navigation
+                              try {
+                                const res = await axios.delete(
+                                  `http://localhost:8888/api/v1/cred/${cred.id}`,
+                                  { withCredentials: true }
+                                );
+
+                                if (res.status === 200) {
+                                  setCredentials((prev) =>
+                                    prev!.filter((c) => c.id !== cred.id)
+                                  );
+                                  alert("credentials eleted successfully ")
+                                  console.log(
+                                    "Credential deleted successfully"
+                                  );
+                                }
+                              } catch (err) {
+                                console.error(
+                                  "Failed to delete credential",
+                                  err
+                                );
+                              }
+                            }}
+                          />
                         </CardHeader>
                         <CardContent className="text-sm px-3">
                           <div className="flex items-center gap-2">

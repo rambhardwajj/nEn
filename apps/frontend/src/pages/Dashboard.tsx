@@ -21,7 +21,12 @@ const Home = () => {
     <div className=" min-h-screen w-full ">
       <div>
         <div className="w-full flex items-center justify-between px-3 mt-1 border-b ">
-          <div>Your WorkFlows...</div>
+          <div className="flex items-center gap-2 ">
+            <div className="h-5 w-1 rounded bg-teal-600"></div>
+            <h2 className="text-xl font-semibold text-gray-800">
+              Dashboard
+            </h2>
+          </div>{" "}
           <div className="flex gap-1">
             <Link to={"/create"}>
               <Button className='className="px-1 py-1 my-2 mx-2 md:cursor-pointer border-2 border-b-3 border-neutral-800 hover:bg-teal-50 bg-white text-black hover:text-black transition-colors items-center flex rounded-md'>

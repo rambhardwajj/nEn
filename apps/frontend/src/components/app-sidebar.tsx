@@ -1,4 +1,4 @@
-import { Home, Settings, User } from "lucide-react";
+import { Home, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -23,11 +23,7 @@ const items = [
     url: "/",
     icon: Home,
   },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-  },
+  
 ];
 
 export function AppSidebar() {
