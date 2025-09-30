@@ -10,10 +10,25 @@ export class ActionExecutor {
   private nodeOutputs: Map<string, any>;
   private redis: RedisClientType;
 
-  constructor(redisClient: RedisClientType) {
+  constructor() {
     this.credentials = new Map();
     this.nodeOutputs = new Map();
-    this.redis = redisClient;
+    this.redis = createClient({url: "redis://localhost:6379"});
+  }
+
+   async init() {
+    if (!this.redis.isOpen) {
+      await this.redis.connect();
+      console.log("Redis connected");
+    }
+  }
+  
+
+  async close() {
+    if (this.redis.isOpen) {
+      await this.redis.disconnect();
+      console.log("Redis disconnected");
+    }
   }
 
   setCredentials(credentialsMap: Map<string, any>) {
@@ -104,6 +119,7 @@ export class ActionExecutor {
     // Resolve dynamic values in prompt
     const resolvedPrompt = this.resolveDynamicValue(params.prompt, context);
 
+
     // Prepare task payload for AI Agent service
     const taskPayload = {
       taskId,
@@ -117,7 +133,9 @@ export class ActionExecutor {
       timestamp: new Date().toISOString(),
     };
 
+
     try {
+      await this.init();
       await this.redis.lPush("ai-agent-tasks", JSON.stringify(taskPayload));
       const result = await this.waitForAIResult(taskId, 120000); // 2 minutes timeout
       return {
@@ -137,6 +155,7 @@ export class ActionExecutor {
     // get the response from teh llm 
     // return the response 
 
+    return {test: "this is text"}
     
   }
 
